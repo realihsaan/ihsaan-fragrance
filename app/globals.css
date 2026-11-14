@@ -8661,26 +8661,16 @@ select:-webkit-autofill {
   min-width: 0;
   max-width: 500px;
   justify-self: start;
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), filter 0.32s ease;
+  transition: opacity 0.25s ease;
+  transform: none !important;
 }
 
 .showcase-text-stage.is-active {
   opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
 }
 
 .showcase-text-stage.is-transitioning {
-  opacity: 0;
-  filter: blur(3px);
-}
-
-.showcase-text-stage.is-transitioning.anim-out-next {
-  transform: translateY(-16px) scale(0.98);
-}
-
-.showcase-text-stage.is-transitioning.anim-out-prev {
-  transform: translateY(16px) scale(0.98);
+  opacity: 0.85;
 }
 
 /* Quick Expression Nav Tabs */
@@ -8798,36 +8788,31 @@ select:-webkit-autofill {
   color: #DEC89C;
 }
 
-/* Letter by Letter Typography Animation */
+/* Letter by Letter Typography Animation (Smooth Staggered Reveal, No 3D Flip) */
 .letter-by-letter-stream {
   display: inline;
-  perspective: 600px;
 }
 
 .letter-char {
   display: inline-block;
   opacity: 0;
-  transform: translateY(14px) rotateX(-75deg);
-  transform-origin: 50% 100%;
-  animation: charFlipIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateY(4px);
+  animation: charFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
-  backface-visibility: hidden;
 }
 
 .letter-char.letter-space {
   width: 0.28em;
 }
 
-@keyframes charFlipIn {
+@keyframes charFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(16px) rotateX(-80deg) scale(0.88);
-    filter: blur(2px);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) rotateX(0deg) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
@@ -9015,24 +9000,33 @@ select:-webkit-autofill {
   position: absolute;
   width: min(410px, 88vw);
   background: #3B3A39;
-  border: 1px solid rgba(197, 171, 122, 0.32);
+  border: 1px solid var(--card-border-soft, rgba(197, 171, 122, 0.32));
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 28px 70px rgba(15, 14, 13, 0.75), 0 0 40px rgba(197, 171, 122, 0.16);
+  box-shadow: 0 28px 70px rgba(15, 14, 13, 0.75), 0 0 35px var(--card-glow-soft, rgba(197, 171, 122, 0.16));
   transform-style: preserve-3d;
   will-change: transform, opacity;
   transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.55s ease, filter 0.55s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .showcase-3d-card.is-center {
-  border-color: rgba(197, 171, 122, 0.6);
-  box-shadow: 0 35px 85px rgba(15, 14, 13, 0.9), 0 0 50px rgba(197, 171, 122, 0.3);
+  border-color: var(--card-primary, rgba(197, 171, 122, 0.6));
+  box-shadow: 0 35px 85px rgba(15, 14, 13, 0.9), 0 0 50px var(--card-glow, rgba(197, 171, 122, 0.3));
+}
+
+/* Matching Bottle Color Glow on Hover */
+.showcase-3d-card:hover {
+  border-color: var(--card-highlight, #DEC89C) !important;
+  box-shadow: 0 38px 95px rgba(10, 9, 8, 0.95), 
+              0 0 55px var(--card-glow, rgba(197, 171, 122, 0.65)), 
+              0 0 95px var(--card-glow-strong, rgba(197, 171, 122, 0.45)), 
+              inset 0 0 30px var(--card-glow-soft, rgba(197, 171, 122, 0.25)) !important;
 }
 
 .showcase-3d-card.is-next:hover,
 .showcase-3d-card.is-prev:hover {
-  opacity: 0.88 !important;
-  filter: brightness(1.12);
+  opacity: 0.92 !important;
+  filter: brightness(1.15);
 }
 
 /* --------------------------------------------------------------------------
@@ -9168,20 +9162,29 @@ select:-webkit-autofill {
 }
 
 .showcase-bottle-img {
-  transition: transform 0.5s ease;
-  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.65));
 }
 
-.showcase-3d-card.is-center:hover .showcase-bottle-img {
-  transform: scale(1.05) translateY(-4px);
+.showcase-3d-card:hover .showcase-bottle-img {
+  filter: drop-shadow(0 20px 35px var(--card-glow, rgba(197, 171, 122, 0.65))) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) !important;
+  transform: scale(1.06) translateY(-6px);
 }
 
 .showcase-card-ambient-glow {
   position: absolute;
-  inset: 15%;
-  background: radial-gradient(circle, rgba(197, 171, 122, 0.25) 0%, transparent 70%);
+  inset: 10%;
+  background: var(--card-halo, radial-gradient(circle, rgba(197, 171, 122, 0.25) 0%, transparent 70%));
   pointer-events: none;
   z-index: 0;
+  transition: opacity 0.45s ease, transform 0.55s ease, filter 0.45s ease;
+  opacity: 0.65;
+}
+
+.showcase-3d-card:hover .showcase-card-ambient-glow {
+  opacity: 1 !important;
+  transform: scale(1.35);
+  filter: blur(8px);
 }
 
 .showcase-card-badges {

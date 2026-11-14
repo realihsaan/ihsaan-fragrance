@@ -114,49 +114,58 @@ const FORMULATION_SPECS = {
 
 const PRODUCT_THEMES = {
   ext: {
+    id: "ext",
+    name: "Extrait de Parfum",
     primary: "#E6A838",
-    highlight: "#FFCA65",
-    glow: "rgba(230, 168, 56, 0.38)",
-    glowSoft: "rgba(230, 168, 56, 0.16)",
+    highlight: "#FFD078",
+    glow: "rgba(230, 168, 56, 0.65)",
+    glowStrong: "rgba(230, 168, 56, 0.45)",
+    glowSoft: "rgba(230, 168, 56, 0.22)",
     surface: "#332F2B",
     surfaceAlt: "#262320",
-    border: "rgba(230, 168, 56, 0.48)",
-    borderSoft: "rgba(230, 168, 56, 0.22)",
-    badgeBg: "rgba(230, 168, 56, 0.16)",
-    taglineColor: "#FFCA65",
-    btnGradient: "linear-gradient(135deg, #FFCA65 0%, #E6A838 50%, #B87A1E 100%)",
+    border: "rgba(230, 168, 56, 0.55)",
+    borderSoft: "rgba(230, 168, 56, 0.28)",
+    badgeBg: "rgba(230, 168, 56, 0.18)",
+    taglineColor: "#FFD078",
+    btnGradient: "linear-gradient(135deg, #FFD078 0%, #E6A838 50%, #B87A1E 100%)",
     btnColor: "#1B1814",
-    halo: "radial-gradient(circle, rgba(230, 168, 56, 0.32) 0%, transparent 70%)",
+    halo: "radial-gradient(circle, rgba(230, 168, 56, 0.48) 0%, rgba(230, 168, 56, 0.18) 50%, transparent 75%)",
   },
   edp: {
+    id: "edp",
+    name: "Eau de Parfum",
     primary: "#C5AB7A",
     highlight: "#DEC89C",
-    glow: "rgba(197, 171, 122, 0.32)",
-    glowSoft: "rgba(197, 171, 122, 0.14)",
+    glow: "rgba(197, 171, 122, 0.60)",
+    glowStrong: "rgba(197, 171, 122, 0.40)",
+    glowSoft: "rgba(197, 171, 122, 0.20)",
     surface: "#3B3A39",
     surfaceAlt: "#2A2928",
-    border: "rgba(197, 171, 122, 0.45)",
-    borderSoft: "rgba(197, 171, 122, 0.22)",
-    badgeBg: "rgba(197, 171, 122, 0.14)",
+    border: "rgba(197, 171, 122, 0.55)",
+    borderSoft: "rgba(197, 171, 122, 0.28)",
+    badgeBg: "rgba(197, 171, 122, 0.16)",
     taglineColor: "#DEC89C",
     btnGradient: "linear-gradient(135deg, #DEC89C 0%, #C5AB7A 50%, #A18758 100%)",
     btnColor: "#262524",
-    halo: "radial-gradient(circle, rgba(197, 171, 122, 0.28) 0%, transparent 70%)",
+    halo: "radial-gradient(circle, rgba(197, 171, 122, 0.45) 0%, rgba(197, 171, 122, 0.16) 50%, transparent 75%)",
   },
   edt: {
+    id: "edt",
+    name: "Eau de Toilette",
     primary: "#E8D5A3",
     highlight: "#FFF1CE",
-    glow: "rgba(232, 213, 163, 0.38)",
-    glowSoft: "rgba(232, 213, 163, 0.16)",
+    glow: "rgba(232, 213, 163, 0.68)",
+    glowStrong: "rgba(232, 213, 163, 0.45)",
+    glowSoft: "rgba(232, 213, 163, 0.22)",
     surface: "#323534",
     surfaceAlt: "#242726",
-    border: "rgba(232, 213, 163, 0.48)",
-    borderSoft: "rgba(232, 213, 163, 0.24)",
-    badgeBg: "rgba(232, 213, 163, 0.16)",
+    border: "rgba(232, 213, 163, 0.55)",
+    borderSoft: "rgba(232, 213, 163, 0.28)",
+    badgeBg: "rgba(232, 213, 163, 0.18)",
     taglineColor: "#FFF1CE",
     btnGradient: "linear-gradient(135deg, #FFF1CE 0%, #E8D5A3 50%, #C4AE77 100%)",
     btnColor: "#1A1D1C",
-    halo: "radial-gradient(circle, rgba(232, 213, 163, 0.3) 0%, transparent 70%)",
+    halo: "radial-gradient(circle, rgba(232, 213, 163, 0.48) 0%, rgba(232, 213, 163, 0.18) 50%, transparent 75%)",
   },
 };
 
@@ -298,7 +307,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
         
         {/* Left Column: Dynamically Animated Perfume Story & Formulation Specs */}
         <div 
-          className={`showcase-text-stage ${isTransitioning ? `is-transitioning ${direction === "next" ? "anim-out-next" : "anim-out-prev"}` : "is-active"}`}
+          className={`showcase-text-stage ${isTransitioning ? "is-transitioning" : "is-active"}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -619,7 +628,16 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                 <div
                   key={prod.id}
                   className={cardClass}
-                  style={transformStyle}
+                  style={{
+                    ...transformStyle,
+                    "--card-primary": cardTheme.primary,
+                    "--card-highlight": cardTheme.highlight,
+                    "--card-glow": cardTheme.glow,
+                    "--card-glow-strong": cardTheme.glowStrong,
+                    "--card-glow-soft": cardTheme.glowSoft,
+                    "--card-halo": cardTheme.halo,
+                    "--card-border-soft": cardTheme.borderSoft,
+                  }}
                   onClick={(e) => {
                     if (hasMovedRef.current) {
                       e.preventDefault();
