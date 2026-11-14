@@ -112,6 +112,30 @@ const FORMULATION_SPECS = {
   },
 };
 
+function LetterByLetter({ text, keyPrefix = "lbl", baseDelay = 0.04, step = 0.022, className = "" }) {
+  if (!text) return null;
+  const chars = Array.from(text);
+  return (
+    <span className={`letter-by-letter-stream ${className}`} aria-label={text}>
+      {chars.map((ch, idx) => {
+        const isSpace = ch === " ";
+        return (
+          <span
+            key={`${keyPrefix}-${idx}`}
+            aria-hidden="true"
+            className={`letter-char ${isSpace ? "letter-space" : ""}`}
+            style={{
+              animationDelay: `${(baseDelay + idx * step).toFixed(3)}s`,
+            }}
+          >
+            {isSpace ? "\u00A0" : ch}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 function CollectionShowcase3D({ products, collectionCopy }) {
   const { add, wishlist, toggleWish } = useStore();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -119,7 +143,10 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   const [direction, setDirection] = useState("next");
   const [isHovered, setIsHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const touchStartXRef = useRef(null);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef(0);
+  const hasMovedRef = useRef(false);
 
   const activeProduct = products[activeIndex] || products[0];
   const activeSpec = FORMULATION_SPECS[activeProduct?.id] || FORMULATION_SPECS.ext;
@@ -133,7 +160,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
-    }, 320);
+    }, 280);
   }, [activeIndex, isTransitioning]);
 
   const handleNext = useCallback(() => {
@@ -144,46 +171,73 @@ function CollectionShowcase3D({ products, collectionCopy }) {
     goTo((activeIndex - 1 + products.length) % products.length, "prev");
   }, [activeIndex, goTo, products.length]);
 
-  // Autoplay loop (5.5 seconds) with pause on hover
+  // Autoplay loop (5.5 seconds) with pause on hover or dragging
   useEffect(() => {
-    if (isHovered || isTransitioning || products.length <= 1) return undefined;
+    if (isHovered || isDragging || isTransitioning || products.length <= 1) return undefined;
     const timer = setInterval(() => {
       handleNext();
     }, 5500);
     return () => clearInterval(timer);
-  }, [handleNext, isHovered, isTransitioning, products.length]);
+  }, [handleNext, isHovered, isDragging, isTransitioning, products.length]);
 
-  // Interactive 3D mouse parallax tilt
-  const handleMouseMove = (e) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    setTilt({
-      x: (x / (rect.width / 2)) * 10,
-      y: -(y / (rect.height / 2)) * 10,
-    });
+  // Pointer drag gestures (Mouse Grab & Touch Swipe)
+  const handlePointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    setIsDragging(true);
+    dragStartXRef.current = e.clientX;
+    hasMovedRef.current = false;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+  };
+
+  const handlePointerMove = (e) => {
+    if (isDragging) {
+      const diff = e.clientX - dragStartXRef.current;
+      if (Math.abs(diff) > 4) {
+        hasMovedRef.current = true;
+      }
+      setDragX(diff);
+    } else {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      setTilt({
+        x: (x / (rect.width / 2)) * 10,
+        y: -(y / (rect.height / 2)) * 10,
+      });
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    // Flip threshold: 45px drag
+    if (Math.abs(dragX) > 45) {
+      if (dragX < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+    setDragX(0);
+  };
+
+  const handlePointerCancel = () => {
+    setIsDragging(false);
+    setDragX(0);
   };
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
-    setIsHovered(false);
-  };
-
-  // Touch swipe support for mobile
-  const handleTouchStart = (e) => {
-    touchStartXRef.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e) => {
-    if (touchStartXRef.current === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartXRef.current - touchEndX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) handleNext();
-      else handlePrev();
+    if (!isDragging) {
+      setTilt({ x: 0, y: 0 });
+      setIsHovered(false);
     }
-    touchStartXRef.current = null;
   };
 
   if (!products.length) return null;
@@ -216,22 +270,37 @@ function CollectionShowcase3D({ products, collectionCopy }) {
             ))}
           </div>
 
-          {/* Eyebrow with formulation tag */}
+          {/* Eyebrow with formulation tag and letter-by-letter reveal */}
           <div className="showcase-eyebrow-row">
             <span className="cap dk showcase-eyebrow">
-              HAUTE PARFUMERIE · EXPRESSION 0{activeIndex + 1} OF 0{products.length}
+              <LetterByLetter
+                key={`eyebrow-${activeProduct.id}`}
+                text={`HAUTE PARFUMERIE · EXPRESSION 0${activeIndex + 1} OF 0${products.length}`}
+                baseDelay={0.02}
+                step={0.012}
+              />
             </span>
             <span className="showcase-badge-soft">{activeSpec.concentration}</span>
           </div>
 
-          {/* Dynamic Main Title */}
+          {/* Dynamic Main Title: Letter-by-Letter 3D Flip Cascade */}
           <h2 className="showcase-title">
-            {activeProduct.name}
+            <LetterByLetter
+              key={`title-${activeProduct.id}`}
+              text={activeProduct.name}
+              baseDelay={0.06}
+              step={0.024}
+            />
           </h2>
 
-          {/* Tagline */}
+          {/* Tagline: Letter-by-Letter Reveal */}
           <p className="showcase-tagline">
-            “{activeProduct.tag}”
+            “<LetterByLetter
+              key={`tag-${activeProduct.id}`}
+              text={activeProduct.tag}
+              baseDelay={0.20}
+              step={0.016}
+            />”
           </p>
 
           {/* Formulation Description */}
@@ -291,13 +360,15 @@ function CollectionShowcase3D({ products, collectionCopy }) {
           </div>
         </div>
 
-        {/* Right Column: 3D Perspective Floating Card Stage */}
+        {/* Right Column: 3D Perspective Floating Card Stage with Mouse Grab & 3D Flip */}
         <div 
-          className="showcase-3d-stage"
+          className={`showcase-3d-stage ${isDragging ? "is-user-dragging" : ""}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={handleMouseLeave}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
         >
           <div className="showcase-3d-viewport">
             {products.map((prod, idx) => {
@@ -315,31 +386,75 @@ function CollectionShowcase3D({ products, collectionCopy }) {
 
               if (isCurrent) {
                 cardClass += " is-center";
-                transformStyle = {
-                  transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(80px) scale(1)`,
-                  opacity: 1,
-                  zIndex: 10,
-                  pointerEvents: "auto",
-                };
+                if (isTransitioning) {
+                  cardClass += direction === "next" ? " is-flipping-out-next" : " is-flipping-out-prev";
+                }
+                if (isDragging) {
+                  const dragRotY = tilt.x + (dragX / 240) * 45;
+                  const dragShiftX = dragX * 0.85;
+                  const dragShiftZ = 80 - Math.min(Math.abs(dragX) * 0.35, 60);
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(1)`,
+                    opacity: 1,
+                    zIndex: 10,
+                    transition: "none",
+                    cursor: "grabbing",
+                  };
+                } else {
+                  transformStyle = {
+                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(80px) scale(1)`,
+                    opacity: 1,
+                    zIndex: 10,
+                    cursor: "grab",
+                  };
+                }
               } else if (isNext) {
                 cardClass += " is-next";
-                transformStyle = {
-                  transform: "perspective(1200px) translateX(65%) translateZ(-140px) rotateY(-22deg) scale(0.82)",
-                  opacity: 0.65,
-                  zIndex: 5,
-                  cursor: "pointer",
-                };
+                if (isDragging && dragX < 0) {
+                  const factor = Math.min(Math.abs(dragX) / 260, 1);
+                  const curX = 65 - factor * 45;
+                  const curZ = -140 + factor * 180;
+                  const curRot = -28 + factor * 25;
+                  const curScale = 0.82 + factor * 0.15;
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                    opacity: 0.65 + factor * 0.3,
+                    zIndex: 6,
+                    transition: "none",
+                  };
+                } else {
+                  transformStyle = {
+                    transform: "perspective(1200px) translateX(65%) translateZ(-140px) rotateY(-28deg) scale(0.82)",
+                    opacity: 0.65,
+                    zIndex: 5,
+                    cursor: "pointer",
+                  };
+                }
               } else if (isPrev) {
                 cardClass += " is-prev";
-                transformStyle = {
-                  transform: "perspective(1200px) translateX(-65%) translateZ(-140px) rotateY(22deg) scale(0.82)",
-                  opacity: 0.45,
-                  zIndex: 4,
-                  cursor: "pointer",
-                };
+                if (isDragging && dragX > 0) {
+                  const factor = Math.min(dragX / 260, 1);
+                  const curX = -65 + factor * 45;
+                  const curZ = -140 + factor * 180;
+                  const curRot = 28 - factor * 25;
+                  const curScale = 0.82 + factor * 0.15;
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                    opacity: 0.65 + factor * 0.3,
+                    zIndex: 6,
+                    transition: "none",
+                  };
+                } else {
+                  transformStyle = {
+                    transform: "perspective(1200px) translateX(-65%) translateZ(-140px) rotateY(28deg) scale(0.82)",
+                    opacity: 0.65,
+                    zIndex: 4,
+                    cursor: "pointer",
+                  };
+                }
               } else {
                 transformStyle = {
-                  transform: "perspective(1200px) translateX(120%) translateZ(-250px) rotateY(-30deg) scale(0.6)",
+                  transform: "perspective(1200px) translateX(120%) translateZ(-250px) rotateY(-35deg) scale(0.6)",
                   opacity: 0,
                   zIndex: 1,
                   pointerEvents: "none",
@@ -354,17 +469,29 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                   key={prod.id}
                   className={cardClass}
                   style={transformStyle}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (hasMovedRef.current) {
+                      e.preventDefault();
+                      return;
+                    }
                     if (!isCurrent) goTo(idx, idx > activeIndex ? "next" : "prev");
                   }}
-                  onMouseMove={isCurrent ? handleMouseMove : undefined}
                 >
                   {/* Subtle 3D Ambient Halo Glow */}
                   <div className="showcase-card-ambient-glow" />
 
+                  {/* 3D Flip Light Reflection Sheen */}
+                  <div className="showcase-card-flip-sheen" />
+
                   {/* Bottle Media Frame */}
                   <div className="showcase-card-media">
-                    <Link href={`/product?id=${prod.id}`} tabIndex={isCurrent ? 0 : -1}>
+                    <Link 
+                      href={`/product?id=${prod.id}`}
+                      tabIndex={isCurrent ? 0 : -1}
+                      onClick={(e) => {
+                        if (hasMovedRef.current) e.preventDefault();
+                      }}
+                    >
                       <Image
                         src={prod.img}
                         alt={prod.name}
@@ -417,7 +544,10 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                       <Link 
                         href={`/product?id=${prod.id}`}
                         className="btn line showcase-quick-inspect"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          if (hasMovedRef.current) e.preventDefault();
+                          else e.stopPropagation();
+                        }}
                       >
                         Inspect
                       </Link>
@@ -428,35 +558,11 @@ function CollectionShowcase3D({ products, collectionCopy }) {
             })}
           </div>
 
-          {/* 3D Navigation Controls */}
-          <div className="showcase-floating-controls">
-            <button
-              type="button"
-              className="showcase-nav-arrow arrow-prev"
-              onClick={handlePrev}
-              aria-label="Previous fragrance"
-            >
-              ‹
-            </button>
-            <div className="showcase-counter-dots">
-              {products.map((p, i) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`showcase-dot ${i === activeIndex ? "is-active" : ""}`}
-                  onClick={() => goTo(i, i > activeIndex ? "next" : "prev")}
-                  aria-label={`View ${p.short}`}
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              className="showcase-nav-arrow arrow-next"
-              onClick={handleNext}
-              aria-label="Next fragrance"
-            >
-              ›
-            </button>
+          {/* Mouse Drag & Swipe Instruction Hint (replaces old bottom arrow buttons) */}
+          <div className="showcase-drag-hint" aria-hidden="true">
+            <span className="drag-hint-icon">‹‹</span>
+            <span className="drag-hint-text">Drag with mouse to flip expressions</span>
+            <span className="drag-hint-icon">››</span>
           </div>
         </div>
 
