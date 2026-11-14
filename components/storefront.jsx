@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_CONTENT, NOTES, PRODUCTS, SHIPPING, STAGES, money, productById as catalogProductById } from "./catalog";
 import { useStore } from "./store-context";
 
@@ -86,6 +86,383 @@ function ProductGrid({ products, empty = "No products found." }) {
       {products.map((product) => <ProductCard key={product.id} product={product} />)}
     </div>
   ) : <p className="empty">{empty}</p>;
+}
+
+const FORMULATION_SPECS = {
+  ext: {
+    concentration: "Extrait de Parfum · 35% Pure French Concentrate",
+    badge: "Pure Extrait · 35%",
+    notesHighlight: "Smoky Birch, Ambergris, Rare Oud Absolue",
+    sillage: "16+ Hours · Profound Sillage",
+    mood: "Intense, Sultry & Nocturne",
+  },
+  edp: {
+    concentration: "Eau de Parfum · 20% Parfum Oil",
+    badge: "Signature EDP · 20%",
+    notesHighlight: "Calabrian Bergamot, Crushed Pepper, Cedarwood",
+    sillage: "10–12 Hours · Balanced Aura",
+    mood: "Versatile, Charismatic & Magnetic",
+  },
+  edt: {
+    concentration: "Eau de Toilette · 14% Luminous Blend",
+    badge: "Luminous EDT · 14%",
+    notesHighlight: "Sparkling Citrus, White Jasmine, Clean Sandalwood",
+    sillage: "6–8 Hours · Radiant Crisp Trail",
+    mood: "Fresh, Luminous & Effortless Daily",
+  },
+};
+
+function CollectionShowcase3D({ products, collectionCopy }) {
+  const { add, wishlist, toggleWish } = useStore();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [direction, setDirection] = useState("next");
+  const [isHovered, setIsHovered] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const touchStartXRef = useRef(null);
+
+  const activeProduct = products[activeIndex] || products[0];
+  const activeSpec = FORMULATION_SPECS[activeProduct?.id] || FORMULATION_SPECS.ext;
+
+  const goTo = useCallback((nextIdx, dir = "next") => {
+    if (isTransitioning || nextIdx === activeIndex) return;
+    setDirection(dir);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveIndex(nextIdx);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 320);
+  }, [activeIndex, isTransitioning]);
+
+  const handleNext = useCallback(() => {
+    goTo((activeIndex + 1) % products.length, "next");
+  }, [activeIndex, goTo, products.length]);
+
+  const handlePrev = useCallback(() => {
+    goTo((activeIndex - 1 + products.length) % products.length, "prev");
+  }, [activeIndex, goTo, products.length]);
+
+  // Autoplay loop (5.5 seconds) with pause on hover
+  useEffect(() => {
+    if (isHovered || isTransitioning || products.length <= 1) return undefined;
+    const timer = setInterval(() => {
+      handleNext();
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [handleNext, isHovered, isTransitioning, products.length]);
+
+  // Interactive 3D mouse parallax tilt
+  const handleMouseMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setTilt({
+      x: (x / (rect.width / 2)) * 10,
+      y: -(y / (rect.height / 2)) * 10,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setIsHovered(false);
+  };
+
+  // Touch swipe support for mobile
+  const handleTouchStart = (e) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartXRef.current - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) handleNext();
+      else handlePrev();
+    }
+    touchStartXRef.current = null;
+  };
+
+  if (!products.length) return null;
+
+  return (
+    <section className="luxury-collection-showcase-3d" aria-label="3D Fragrance Collection Showcase">
+      <div className="wrap showcase-grid-layout">
+        
+        {/* Left Column: Dynamically Animated Perfume Story & Formulation Specs */}
+        <div 
+          className={`showcase-text-stage ${isTransitioning ? `is-transitioning ${direction === "next" ? "anim-out-next" : "anim-out-prev"}` : "is-active"}`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Quick Expression Switcher Tabs */}
+          <div className="showcase-expression-nav" role="tablist" aria-label="Fragrance Expressions">
+            {products.map((prod, idx) => (
+              <button
+                key={prod.id}
+                type="button"
+                role="tab"
+                aria-selected={idx === activeIndex}
+                className={`expression-nav-pill ${idx === activeIndex ? "is-active" : ""}`}
+                onClick={() => goTo(idx, idx > activeIndex ? "next" : "prev")}
+              >
+                <span className="pill-index">0{idx + 1}</span>
+                <span className="pill-name">{prod.short}</span>
+                {idx === activeIndex && !isHovered && <span className="pill-progress-indicator" />}
+              </button>
+            ))}
+          </div>
+
+          {/* Eyebrow with formulation tag */}
+          <div className="showcase-eyebrow-row">
+            <span className="cap dk showcase-eyebrow">
+              HAUTE PARFUMERIE · EXPRESSION 0{activeIndex + 1} OF 0{products.length}
+            </span>
+            <span className="showcase-badge-soft">{activeSpec.concentration}</span>
+          </div>
+
+          {/* Dynamic Main Title */}
+          <h2 className="showcase-title">
+            {activeProduct.name}
+          </h2>
+
+          {/* Tagline */}
+          <p className="showcase-tagline">
+            “{activeProduct.tag}”
+          </p>
+
+          {/* Formulation Description */}
+          <p className="showcase-desc">
+            {activeProduct.desc}
+          </p>
+
+          {/* Formulation Meta Specs */}
+          <div className="showcase-specs-grid">
+            <div className="showcase-spec-item">
+              <span className="spec-label">Flacon Architecture</span>
+              <strong className="spec-value">{activeProduct.size} · Heavy French Glass</strong>
+            </div>
+            <div className="showcase-spec-item">
+              <span className="spec-label">Olfactory Signature</span>
+              <strong className="spec-value">{activeSpec.notesHighlight}</strong>
+            </div>
+            <div className="showcase-spec-item">
+              <span className="spec-label">Longevity & Sillage</span>
+              <strong className="spec-value">{activeSpec.sillage}</strong>
+            </div>
+            <div className="showcase-spec-item">
+              <span className="spec-label">Sensory Character</span>
+              <strong className="spec-value">{activeSpec.mood}</strong>
+            </div>
+          </div>
+
+          {/* Pricing & Call To Action */}
+          <div className="showcase-cta-row">
+            <div className="showcase-price-box">
+              <span className="price-label">Price</span>
+              <span className="showcase-big-price">{money(activeProduct.price)}</span>
+              <small className="price-sub">Free Nationwide Express Delivery</small>
+            </div>
+            <div className="showcase-cta-buttons">
+              <button
+                type="button"
+                className="btn showcase-main-btn"
+                disabled={!activeProduct.stock}
+                onClick={(e) => add(activeProduct.id, 1, e)}
+              >
+                <span>Add {activeProduct.short} to Bag</span>
+              </button>
+              <Link href={`/product?id=${activeProduct.id}`} className="btn line showcase-secondary-btn">
+                <span>View Full Notes</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Shop All Link */}
+          <div className="showcase-shop-all-strip">
+            <Link href="/shop" className="showcase-shop-all-link">
+              <span>View all 3 expressions in the catalog</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column: 3D Perspective Floating Card Stage */}
+        <div 
+          className="showcase-3d-stage"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="showcase-3d-viewport">
+            {products.map((prod, idx) => {
+              const count = products.length;
+              let offset = idx - activeIndex;
+              if (offset < -1) offset += count;
+              if (offset > 1) offset -= count;
+
+              const isCurrent = idx === activeIndex;
+              const isNext = offset === 1 || (activeIndex === count - 1 && idx === 0);
+              const isPrev = offset === -1 || (activeIndex === 0 && idx === count - 1);
+
+              let cardClass = "showcase-3d-card";
+              let transformStyle = {};
+
+              if (isCurrent) {
+                cardClass += " is-center";
+                transformStyle = {
+                  transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(80px) scale(1)`,
+                  opacity: 1,
+                  zIndex: 10,
+                  pointerEvents: "auto",
+                };
+              } else if (isNext) {
+                cardClass += " is-next";
+                transformStyle = {
+                  transform: "perspective(1200px) translateX(65%) translateZ(-140px) rotateY(-22deg) scale(0.82)",
+                  opacity: 0.65,
+                  zIndex: 5,
+                  cursor: "pointer",
+                };
+              } else if (isPrev) {
+                cardClass += " is-prev";
+                transformStyle = {
+                  transform: "perspective(1200px) translateX(-65%) translateZ(-140px) rotateY(22deg) scale(0.82)",
+                  opacity: 0.45,
+                  zIndex: 4,
+                  cursor: "pointer",
+                };
+              } else {
+                transformStyle = {
+                  transform: "perspective(1200px) translateX(120%) translateZ(-250px) rotateY(-30deg) scale(0.6)",
+                  opacity: 0,
+                  zIndex: 1,
+                  pointerEvents: "none",
+                };
+              }
+
+              const prodSpec = FORMULATION_SPECS[prod.id] || FORMULATION_SPECS.ext;
+              const isProdWish = wishlist.includes(prod.id);
+
+              return (
+                <div
+                  key={prod.id}
+                  className={cardClass}
+                  style={transformStyle}
+                  onClick={() => {
+                    if (!isCurrent) goTo(idx, idx > activeIndex ? "next" : "prev");
+                  }}
+                  onMouseMove={isCurrent ? handleMouseMove : undefined}
+                >
+                  {/* Subtle 3D Ambient Halo Glow */}
+                  <div className="showcase-card-ambient-glow" />
+
+                  {/* Bottle Media Frame */}
+                  <div className="showcase-card-media">
+                    <Link href={`/product?id=${prod.id}`} tabIndex={isCurrent ? 0 : -1}>
+                      <Image
+                        src={prod.img}
+                        alt={prod.name}
+                        fill
+                        sizes="(max-width: 768px) 85vw, 420px"
+                        style={{ objectFit: "contain" }}
+                        priority={isCurrent}
+                        className="showcase-bottle-img"
+                      />
+                    </Link>
+                    <div className="showcase-card-badges">
+                      <span className="showcase-badge-pill">{prodSpec.badge}</span>
+                      <span className="showcase-size-tag">{prod.size}</span>
+                    </div>
+                    <button
+                      className={`heart showcase-heart-btn ${isProdWish ? "is-active" : ""}`}
+                      type="button"
+                      aria-label={`${isProdWish ? "Remove" : "Save"} ${prod.short} to wishlist`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWish(prod.id);
+                      }}
+                    >
+                      {isProdWish ? "♥" : "♡"}
+                    </button>
+                  </div>
+
+                  {/* Card Info Overlay */}
+                  <div className="showcase-card-info">
+                    <div className="showcase-card-name-row">
+                      <h3>{prod.name}</h3>
+                      <span className="showcase-card-price">{money(prod.price)}</span>
+                    </div>
+                    <p className="showcase-card-tag">{prod.tag}</p>
+                    <div className="showcase-card-actions">
+                      <button
+                        type="button"
+                        className="btn showcase-quick-add-btn"
+                        disabled={!prod.stock}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          add(prod.id, 1, e);
+                        }}
+                      >
+                        <svg className="i" aria-hidden="true" viewBox="0 0 24 24" style={{ width: 14, height: 14, fill: "currentColor" }}>
+                          <path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2" />
+                        </svg>
+                        <span>Add to bag</span>
+                      </button>
+                      <Link 
+                        href={`/product?id=${prod.id}`}
+                        className="btn line showcase-quick-inspect"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Inspect
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 3D Navigation Controls */}
+          <div className="showcase-floating-controls">
+            <button
+              type="button"
+              className="showcase-nav-arrow arrow-prev"
+              onClick={handlePrev}
+              aria-label="Previous fragrance"
+            >
+              ‹
+            </button>
+            <div className="showcase-counter-dots">
+              {products.map((p, i) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`showcase-dot ${i === activeIndex ? "is-active" : ""}`}
+                  onClick={() => goTo(i, i > activeIndex ? "next" : "prev")}
+                  aria-label={`View ${p.short}`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="showcase-nav-arrow arrow-next"
+              onClick={handleNext}
+              aria-label="Next fragrance"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
 }
 
 function HomePage() {
@@ -196,29 +573,8 @@ function HomePage() {
         </div>
       </section>
 
-      {/* The Fragrance Collection */}
-      <section className="light coll luxury-collection-section">
-        <div className="l luxury-coll-intro">
-          <span className="cap dk luxury-section-eyebrow">{collectionCopy.eyebrow}</span>
-          <h2>{collectionCopy.heading}</h2>
-          <p>{collectionCopy.body}</p>
-          <div className="luxury-intro-meta">
-            <div className="meta-item">
-              <strong>3 Expressions</strong>
-              <span>Extrait, EDP & EDT</span>
-            </div>
-            <div className="meta-item">
-              <strong>50 ML Flacon</strong>
-              <span>French Heavy Glass</span>
-            </div>
-          </div>
-          <Link className="btn line cap luxury-coll-btn" href={collectionCopy.button_href}>
-            <span>{collectionCopy.button_text}</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-        <ProductGrid products={fragranceProducts} empty="Fragrances are being prepared. Please check back soon." />
-      </section>
+      {/* 3D Interactive Animated Fragrance Collection Showcase */}
+      <CollectionShowcase3D products={fragranceProducts} collectionCopy={collectionCopy} />
 
       {/* The Olfactory Notes Pyramid Section */}
       <section className="luxury-notes-pyramid-section" aria-labelledby="notes-pyramid-title">
