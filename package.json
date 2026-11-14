@@ -1,0 +1,21 @@
+{
+  "name": "maison-ihsaan-ali",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "db:setup": "node scripts/setup-local-mysql.mjs",
+    "test:smtp": "node scripts/test-smtp.mjs"
+  },
+  "dependencies": {
+    "mysql2": "^3.24.6",
+    "next": "^16.4.5",
+    "nodemailer": "^10.5.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "stripe": "^23.1.0"
+  }
+}
