@@ -112,6 +112,54 @@ const FORMULATION_SPECS = {
   },
 };
 
+const PRODUCT_THEMES = {
+  ext: {
+    primary: "#E6A838",
+    highlight: "#FFCA65",
+    glow: "rgba(230, 168, 56, 0.38)",
+    glowSoft: "rgba(230, 168, 56, 0.16)",
+    surface: "#332F2B",
+    surfaceAlt: "#262320",
+    border: "rgba(230, 168, 56, 0.48)",
+    borderSoft: "rgba(230, 168, 56, 0.22)",
+    badgeBg: "rgba(230, 168, 56, 0.16)",
+    taglineColor: "#FFCA65",
+    btnGradient: "linear-gradient(135deg, #FFCA65 0%, #E6A838 50%, #B87A1E 100%)",
+    btnColor: "#1B1814",
+    halo: "radial-gradient(circle, rgba(230, 168, 56, 0.32) 0%, transparent 70%)",
+  },
+  edp: {
+    primary: "#C5AB7A",
+    highlight: "#DEC89C",
+    glow: "rgba(197, 171, 122, 0.32)",
+    glowSoft: "rgba(197, 171, 122, 0.14)",
+    surface: "#3B3A39",
+    surfaceAlt: "#2A2928",
+    border: "rgba(197, 171, 122, 0.45)",
+    borderSoft: "rgba(197, 171, 122, 0.22)",
+    badgeBg: "rgba(197, 171, 122, 0.14)",
+    taglineColor: "#DEC89C",
+    btnGradient: "linear-gradient(135deg, #DEC89C 0%, #C5AB7A 50%, #A18758 100%)",
+    btnColor: "#262524",
+    halo: "radial-gradient(circle, rgba(197, 171, 122, 0.28) 0%, transparent 70%)",
+  },
+  edt: {
+    primary: "#E8D5A3",
+    highlight: "#FFF1CE",
+    glow: "rgba(232, 213, 163, 0.38)",
+    glowSoft: "rgba(232, 213, 163, 0.16)",
+    surface: "#323534",
+    surfaceAlt: "#242726",
+    border: "rgba(232, 213, 163, 0.48)",
+    borderSoft: "rgba(232, 213, 163, 0.24)",
+    badgeBg: "rgba(232, 213, 163, 0.16)",
+    taglineColor: "#FFF1CE",
+    btnGradient: "linear-gradient(135deg, #FFF1CE 0%, #E8D5A3 50%, #C4AE77 100%)",
+    btnColor: "#1A1D1C",
+    halo: "radial-gradient(circle, rgba(232, 213, 163, 0.3) 0%, transparent 70%)",
+  },
+};
+
 function LetterByLetter({ text, keyPrefix = "lbl", baseDelay = 0.04, step = 0.022, className = "" }) {
   if (!text) return null;
   const chars = Array.from(text);
@@ -139,6 +187,7 @@ function LetterByLetter({ text, keyPrefix = "lbl", baseDelay = 0.04, step = 0.02
 function CollectionShowcase3D({ products, collectionCopy }) {
   const { add, wishlist, toggleWish } = useStore();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [animatingFromIndex, setAnimatingFromIndex] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState("next");
   const [isHovered, setIsHovered] = useState(false);
@@ -150,15 +199,18 @@ function CollectionShowcase3D({ products, collectionCopy }) {
 
   const activeProduct = products[activeIndex] || products[0];
   const activeSpec = FORMULATION_SPECS[activeProduct?.id] || FORMULATION_SPECS.ext;
+  const activeTheme = PRODUCT_THEMES[activeProduct?.id] || PRODUCT_THEMES.ext;
 
   const goTo = useCallback((nextIdx, dir = "next") => {
     if (isTransitioning || nextIdx === activeIndex) return;
     setDirection(dir);
-    setIsTransitioning(true);
+    setAnimatingFromIndex(activeIndex);
     setActiveIndex(nextIdx);
+    setIsTransitioning(true);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 450);
+      setAnimatingFromIndex(null);
+    }, 650);
   }, [activeIndex, isTransitioning]);
 
   const handleNext = useCallback(() => {
@@ -215,8 +267,8 @@ function CollectionShowcase3D({ products, collectionCopy }) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch (err) {}
 
-    // Flip threshold: 45px drag
-    if (Math.abs(dragX) > 45) {
+    // Flip threshold: 40px drag
+    if (Math.abs(dragX) > 40) {
       if (dragX < 0) {
         handleNext();
       } else {
@@ -252,25 +304,36 @@ function CollectionShowcase3D({ products, collectionCopy }) {
         >
           {/* Quick Expression Switcher Tabs */}
           <div className="showcase-expression-nav" role="tablist" aria-label="Fragrance Expressions">
-            {products.map((prod, idx) => (
-              <button
-                key={prod.id}
-                type="button"
-                role="tab"
-                aria-selected={idx === activeIndex}
-                className={`expression-nav-pill ${idx === activeIndex ? "is-active" : ""}`}
-                onClick={() => goTo(idx, idx > activeIndex ? "next" : "prev")}
-              >
-                <span className="pill-index">0{idx + 1}</span>
-                <span className="pill-name">{prod.short}</span>
-                {idx === activeIndex && !isHovered && <span className="pill-progress-indicator" />}
-              </button>
-            ))}
+            {products.map((prod, idx) => {
+              const isPillActive = idx === activeIndex;
+              const pTheme = PRODUCT_THEMES[prod.id] || PRODUCT_THEMES.ext;
+              return (
+                <button
+                  key={prod.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isPillActive}
+                  className={`expression-nav-pill ${isPillActive ? "is-active" : ""}`}
+                  style={isPillActive ? {
+                    borderColor: pTheme.border,
+                    color: pTheme.highlight,
+                    boxShadow: `0 4px 16px ${pTheme.glowSoft}`,
+                  } : undefined}
+                  onClick={() => goTo(idx, idx > activeIndex ? "next" : "prev")}
+                >
+                  <span className="pill-index">0{idx + 1}</span>
+                  <span className="pill-name">{prod.short}</span>
+                  {isPillActive && !isHovered && (
+                    <span className="pill-progress-indicator" style={{ background: pTheme.highlight }} />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Eyebrow with formulation tag and letter-by-letter reveal */}
           <div className="showcase-eyebrow-row">
-            <span className="cap dk showcase-eyebrow">
+            <span className="cap dk showcase-eyebrow" style={{ color: activeTheme.primary }}>
               <LetterByLetter
                 key={`eyebrow-${activeProduct.id}`}
                 text={`HAUTE PARFUMERIE · EXPRESSION 0${activeIndex + 1} OF 0${products.length}`}
@@ -278,11 +341,25 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                 step={0.012}
               />
             </span>
-            <span className="showcase-badge-soft">{activeSpec.concentration}</span>
+            <span 
+              className="showcase-badge-soft"
+              style={{
+                background: activeTheme.badgeBg,
+                borderColor: activeTheme.border,
+                color: activeTheme.highlight,
+              }}
+            >
+              {activeSpec.concentration}
+            </span>
           </div>
 
-          {/* Dynamic Main Title: Letter-by-Letter 3D Flip Cascade */}
-          <h2 className="showcase-title">
+          {/* Dynamic Main Title: Letter-by-Letter 3D Flip Cascade with matching product gradient */}
+          <h2 
+            className="showcase-title"
+            style={{
+              "--title-grad": `linear-gradient(135deg, #FFFFFF 0%, ${activeTheme.highlight} 50%, ${activeTheme.primary} 100%)`,
+            }}
+          >
             <LetterByLetter
               key={`title-${activeProduct.id}`}
               text={activeProduct.name}
@@ -292,7 +369,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
           </h2>
 
           {/* Tagline: Letter-by-Letter Reveal */}
-          <p className="showcase-tagline">
+          <p className="showcase-tagline" style={{ color: activeTheme.taglineColor }}>
             “<LetterByLetter
               key={`tag-${activeProduct.id}`}
               text={activeProduct.tag}
@@ -306,43 +383,55 @@ function CollectionShowcase3D({ products, collectionCopy }) {
             {activeProduct.desc}
           </p>
 
-          {/* Formulation Meta Specs */}
-          <div className="showcase-specs-grid">
+          {/* Formulation Meta Specs with matching accent colors */}
+          <div className="showcase-specs-grid" style={{ borderColor: activeTheme.borderSoft }}>
             <div className="showcase-spec-item">
-              <span className="spec-label">Flacon Architecture</span>
+              <span className="spec-label" style={{ color: activeTheme.primary }}>Flacon Architecture</span>
               <strong className="spec-value">{activeProduct.size} · Heavy French Glass</strong>
             </div>
             <div className="showcase-spec-item">
-              <span className="spec-label">Olfactory Signature</span>
+              <span className="spec-label" style={{ color: activeTheme.primary }}>Olfactory Signature</span>
               <strong className="spec-value">{activeSpec.notesHighlight}</strong>
             </div>
             <div className="showcase-spec-item">
-              <span className="spec-label">Longevity & Sillage</span>
+              <span className="spec-label" style={{ color: activeTheme.primary }}>Longevity & Sillage</span>
               <strong className="spec-value">{activeSpec.sillage}</strong>
             </div>
             <div className="showcase-spec-item">
-              <span className="spec-label">Sensory Character</span>
+              <span className="spec-label" style={{ color: activeTheme.primary }}>Sensory Character</span>
               <strong className="spec-value">{activeSpec.mood}</strong>
             </div>
           </div>
 
-          {/* Pricing & Call To Action */}
+          {/* Pricing & Call To Action matching product color scheme */}
           <div className="showcase-cta-row">
             <div className="showcase-price-box">
-              <span className="price-label">Price</span>
-              <span className="showcase-big-price">{money(activeProduct.price)}</span>
-              <small className="price-sub">Free Nationwide Express Delivery</small>
+              <span className="price-label" style={{ color: activeTheme.primary }}>Price</span>
+              <span className="showcase-big-price" style={{ color: activeTheme.primary }}>{money(activeProduct.price)}</span>
+              <small className="price-sub" style={{ color: activeTheme.highlight }}>Free Nationwide Express Delivery</small>
             </div>
             <div className="showcase-cta-buttons">
               <button
                 type="button"
                 className="btn showcase-main-btn"
                 disabled={!activeProduct.stock}
+                style={{
+                  background: activeTheme.btnGradient,
+                  color: activeTheme.btnColor,
+                  boxShadow: `0 4px 20px ${activeTheme.glowSoft}`,
+                }}
                 onClick={(e) => add(activeProduct.id, 1, e)}
               >
                 <span>Add {activeProduct.short} to Bag</span>
               </button>
-              <Link href={`/product?id=${activeProduct.id}`} className="btn line showcase-secondary-btn">
+              <Link 
+                href={`/product?id=${activeProduct.id}`} 
+                className="btn line showcase-secondary-btn"
+                style={{
+                  borderColor: activeTheme.primary,
+                  color: activeTheme.highlight,
+                }}
+              >
                 <span>View Full Notes</span>
                 <span aria-hidden="true">→</span>
               </Link>
@@ -378,119 +467,153 @@ function CollectionShowcase3D({ products, collectionCopy }) {
               const isCurrent = offset === 0;
               const isNext = offset === 1 || (activeIndex === count - 1 && idx === 0);
               const isPrev = offset === -1 || (activeIndex === 0 && idx === count - 1);
+              const isIncoming = isTransitioning && idx === activeIndex;
+              const isOutgoing = isTransitioning && idx === animatingFromIndex;
+
+              const cardTheme = PRODUCT_THEMES[prod.id] || PRODUCT_THEMES.ext;
+              const prodSpec = FORMULATION_SPECS[prod.id] || FORMULATION_SPECS.ext;
+              const isProdWish = wishlist.includes(prod.id);
 
               let cardClass = "showcase-3d-card";
               let transformStyle = {};
 
               if (isDragging) {
-                // Interactive real-time rotational drag around the 3D circle
+                // Interactive real-time rotational drag around the 3D circle with Flip-Over dynamics
                 if (isCurrent) {
                   cardClass += " is-center";
-                  const dragRotY = tilt.x + (dragX / 240) * 26;
+                  const dragRotY = tilt.x + (dragX / 160) * 75;
                   const dragShiftX = dragX * 0.7;
-                  const dragShiftZ = 60 - Math.min(Math.abs(dragX) * 0.35, 60);
-                  const dragScale = 1 - Math.min(Math.abs(dragX) / 1200, 0.08);
+                  const dragShiftZ = 60 - Math.min(Math.abs(dragX) * 0.4, 60);
+                  const dragScale = 1 - Math.min(Math.abs(dragX) / 1000, 0.08);
                   transformStyle = {
-                    transform: `perspective(1200px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(${dragScale})`,
+                    transform: `perspective(1400px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(${dragScale})`,
                     opacity: 1,
                     zIndex: 10,
                     transition: "none",
                     cursor: "grabbing",
+                    borderColor: cardTheme.primary,
+                    boxShadow: `0 35px 85px rgba(15, 14, 13, 0.9), 0 0 50px ${cardTheme.glow}`,
                   };
                 } else if (isNext) {
                   cardClass += " is-next";
                   if (dragX < 0) {
-                    const p = Math.min(Math.abs(dragX) / 240, 1);
+                    const p = Math.min(Math.abs(dragX) / 200, 1);
                     const curX = 46 - p * 46;
                     const curZ = -90 + p * 150;
                     const curRot = -20 + p * 20;
                     const curScale = 0.86 + p * 0.14;
                     transformStyle = {
-                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      transform: `perspective(1400px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
                       opacity: 0.65 + p * 0.35,
                       zIndex: p > 0.5 ? 9 : 5,
                       transition: "none",
                       cursor: "pointer",
+                      borderColor: p > 0.5 ? cardTheme.primary : cardTheme.borderSoft,
                     };
                   } else {
                     transformStyle = {
-                      transform: "perspective(1200px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
+                      transform: "perspective(1400px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
                       opacity: 0.65,
                       zIndex: 5,
                       transition: "none",
                       cursor: "pointer",
+                      borderColor: cardTheme.borderSoft,
                     };
                   }
                 } else if (isPrev) {
                   cardClass += " is-prev";
                   if (dragX > 0) {
-                    const p = Math.min(dragX / 240, 1);
+                    const p = Math.min(dragX / 200, 1);
                     const curX = -46 + p * 46;
                     const curZ = -90 + p * 150;
                     const curRot = 20 - p * 20;
                     const curScale = 0.86 + p * 0.14;
                     transformStyle = {
-                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      transform: `perspective(1400px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
                       opacity: 0.55 + p * 0.45,
                       zIndex: p > 0.5 ? 9 : 4,
                       transition: "none",
                       cursor: "pointer",
+                      borderColor: p > 0.5 ? cardTheme.primary : cardTheme.borderSoft,
                     };
                   } else {
                     transformStyle = {
-                      transform: "perspective(1200px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
+                      transform: "perspective(1400px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
                       opacity: 0.55,
                       zIndex: 4,
                       transition: "none",
                       cursor: "pointer",
+                      borderColor: cardTheme.borderSoft,
                     };
                   }
                 } else {
                   transformStyle = {
-                    transform: "perspective(1200px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
+                    transform: "perspective(1400px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
                     opacity: 0,
                     zIndex: 1,
                     pointerEvents: "none",
                   };
                 }
+              } else if (isTransitioning) {
+                // True 3D Flip-Over animation state
+                if (isIncoming) {
+                  cardClass += direction === "next" ? " is-flipover-in-next" : " is-flipover-in-prev";
+                  transformStyle = {
+                    borderColor: cardTheme.primary,
+                    boxShadow: `0 35px 85px rgba(15, 14, 13, 0.9), 0 0 50px ${cardTheme.glow}`,
+                  };
+                } else if (isOutgoing) {
+                  cardClass += direction === "next" ? " is-flipover-out-next" : " is-flipover-out-prev";
+                  transformStyle = {
+                    borderColor: cardTheme.borderSoft,
+                  };
+                } else {
+                  transformStyle = {
+                    transform: `perspective(1400px) translateX(${offset > 0 ? "46%" : "-46%"}) translateZ(-90px) rotateY(${offset > 0 ? "-20deg" : "20deg"}) scale(0.86)`,
+                    opacity: 0.6,
+                    zIndex: 4,
+                    borderColor: cardTheme.borderSoft,
+                  };
+                }
               } else {
-                // 3D Circular Cylinder Carousel at rest or transitioning smoothly with CSS
+                // 3D Circular Cylinder Carousel at rest with individual matching color themes
                 if (isCurrent) {
                   cardClass += " is-center";
                   transformStyle = {
-                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(60px) scale(1)`,
+                    transform: `perspective(1400px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(60px) scale(1)`,
                     opacity: 1,
                     zIndex: 10,
                     cursor: "grab",
+                    borderColor: cardTheme.primary,
+                    boxShadow: `0 35px 85px rgba(15, 14, 13, 0.9), 0 0 50px ${cardTheme.glow}`,
                   };
                 } else if (isNext) {
                   cardClass += " is-next";
                   transformStyle = {
-                    transform: "perspective(1200px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
+                    transform: "perspective(1400px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
                     opacity: 0.65,
                     zIndex: 5,
                     cursor: "pointer",
+                    borderColor: cardTheme.borderSoft,
                   };
                 } else if (isPrev) {
                   cardClass += " is-prev";
                   transformStyle = {
-                    transform: "perspective(1200px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
+                    transform: "perspective(1400px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
                     opacity: 0.55,
                     zIndex: 4,
                     cursor: "pointer",
+                    borderColor: cardTheme.borderSoft,
                   };
                 } else {
                   transformStyle = {
-                    transform: "perspective(1200px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
+                    transform: "perspective(1400px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
                     opacity: 0,
                     zIndex: 1,
                     pointerEvents: "none",
                   };
                 }
               }
-
-              const prodSpec = FORMULATION_SPECS[prod.id] || FORMULATION_SPECS.ext;
-              const isProdWish = wishlist.includes(prod.id);
 
               return (
                 <div
@@ -505,13 +628,16 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     if (!isCurrent) goTo(idx, isNext ? "next" : "prev");
                   }}
                 >
-                  {/* Subtle 3D Ambient Halo Glow */}
-                  <div className="showcase-card-ambient-glow" />
+                  {/* Matching Product Ambient Halo Glow */}
+                  <div 
+                    className="showcase-card-ambient-glow" 
+                    style={{ background: cardTheme.halo }}
+                  />
 
                   {/* 3D Flip Light Reflection Sheen */}
                   <div className="showcase-card-flip-sheen" />
 
-                  {/* Bottle Media Frame */}
+                  {/* Bottle Media Frame (Larger Card Architecture) */}
                   <div className="showcase-card-media">
                     <Link 
                       href={`/product?id=${prod.id}`}
@@ -524,14 +650,23 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                         src={prod.img}
                         alt={prod.name}
                         fill
-                        sizes="(max-width: 768px) 85vw, 420px"
+                        sizes="(max-width: 768px) 88vw, 480px"
                         style={{ objectFit: "contain" }}
                         priority={isCurrent}
                         className="showcase-bottle-img"
                       />
                     </Link>
                     <div className="showcase-card-badges">
-                      <span className="showcase-badge-pill">{prodSpec.badge}</span>
+                      <span 
+                        className="showcase-badge-pill"
+                        style={{
+                          borderColor: cardTheme.border,
+                          color: cardTheme.highlight,
+                          background: cardTheme.badgeBg,
+                        }}
+                      >
+                        {prodSpec.badge}
+                      </span>
                       <span className="showcase-size-tag">{prod.size}</span>
                     </div>
                     <button
@@ -547,18 +682,26 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     </button>
                   </div>
 
-                  {/* Card Info Overlay */}
+                  {/* Card Info Overlay with matching product color scheme */}
                   <div className="showcase-card-info">
                     <div className="showcase-card-name-row">
                       <h3>{prod.name}</h3>
-                      <span className="showcase-card-price">{money(prod.price)}</span>
+                      <span className="showcase-card-price" style={{ color: cardTheme.primary }}>
+                        {money(prod.price)}
+                      </span>
                     </div>
-                    <p className="showcase-card-tag">{prod.tag}</p>
+                    <p className="showcase-card-tag" style={{ color: cardTheme.highlight }}>
+                      {prod.tag}
+                    </p>
                     <div className="showcase-card-actions">
                       <button
                         type="button"
                         className="btn showcase-quick-add-btn"
                         disabled={!prod.stock}
+                        style={{
+                          background: cardTheme.btnGradient,
+                          color: cardTheme.btnColor,
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           add(prod.id, 1, e);
@@ -572,6 +715,10 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                       <Link 
                         href={`/product?id=${prod.id}`}
                         className="btn line showcase-quick-inspect"
+                        style={{
+                          borderColor: cardTheme.border,
+                          color: cardTheme.highlight,
+                        }}
                         onClick={(e) => {
                           if (hasMovedRef.current) e.preventDefault();
                           else e.stopPropagation();
@@ -586,7 +733,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
             })}
           </div>
 
-          {/* Mouse Drag & Swipe Instruction Hint (replaces old bottom arrow buttons) */}
+          {/* Mouse Drag & Swipe Instruction Hint */}
           <div className="showcase-drag-hint" aria-hidden="true">
             <span className="drag-hint-icon">‹‹</span>
             <span className="drag-hint-text">Drag with mouse to flip expressions</span>
