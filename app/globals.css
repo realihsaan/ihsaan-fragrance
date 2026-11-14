@@ -2,21 +2,31 @@
 
 :root {
   color-scheme: dark;
-  --ink: #0e0906;
-  --gold: #c9a36a;
-  --gold2: #e4c791;
-  --cream: #0e0906;
-  --card: #18110b;
-  --dk: #f3ead9;
-  --line: rgba(201, 163, 106, 0.25);
+  /* Charcoal Surface Palette */
+  --surface-primary: #3B3A39;
+  --surface-highlight: #4D4C4B;
+  --bg-shadow: #262524;
+  
+  /* Champagne Gold Palette */
+  --gold-primary: #C5AB7A;
+  --gold-highlight: #DEC89C;
+  --gold-shadow: #A18758;
+
+  --ink: #262524;
+  --gold: #C5AB7A;
+  --gold2: #DEC89C;
+  --cream: #262524;
+  --card: #3B3A39;
+  --dk: #DEC89C;
+  --line: rgba(197, 171, 122, 0.28);
   --serif: 'Iowan Old Style', Baskerville, 'Palatino Linotype', Georgia, serif;
 }
 
 body,
 body.inner {
   overflow-x: clip;
-  background: #0e0906 !important;
-  color: #f3ead9 !important;
+  background: #262524 !important;
+  color: #F5EFE6 !important;
 }
 
 main.inner,
@@ -24,8 +34,8 @@ main.inner,
 .wrap.page {
   min-height: calc(100vh - 180px);
   padding-top: 104px;
-  color: #f3ead9;
-  background: #0e0906;
+  color: #F5EFE6;
+  background: #262524;
 }
 
 button,
@@ -408,11 +418,11 @@ textarea {
 .checkout-section {
   min-width: 0;
   padding: clamp(18px, 2.4vw, 28px);
-  background: #18110b;
-  border: 1px solid rgba(201, 163, 106, 0.28);
+  background: #3B3A39;
+  border: 1px solid rgba(197, 171, 122, 0.28);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  color: #f7eedb;
+  box-shadow: 0 10px 30px rgba(20, 19, 18, 0.45);
+  color: #F5EFE6;
 }
 
 .checkout-section-heading {
@@ -421,11 +431,11 @@ textarea {
   gap: 12px;
   padding-bottom: 14px;
   margin-bottom: 18px;
-  border-bottom: 1px solid rgba(201, 163, 106, 0.22);
+  border-bottom: 1px solid rgba(197, 171, 122, 0.22);
 }
 
 .checkout-step {
-  color: #d4af37;
+  color: #C5AB7A;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -434,7 +444,7 @@ textarea {
 .checkout-section-heading h2 {
   margin: 0;
   font-size: clamp(24px, 2.3vw, 30px);
-  color: #f7eedb;
+  color: #DEC89C;
 }
 
 .checkout-fields {
@@ -446,7 +456,7 @@ textarea {
 .checkout-fields label {
   min-width: 0;
   margin: 0;
-  color: #e4c791;
+  color: #DEC89C;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -466,7 +476,7 @@ textarea {
 .review-form label {
   display: grid;
   gap: 6px;
-  color: #e4c791;
+  color: #DEC89C;
   font-size: 13px;
   font-weight: 500;
 }
@@ -477,9 +487,9 @@ textarea {
 .review-form select,
 .review-form textarea {
   width: 100%;
-  color: #f7eedb;
-  background: rgba(14, 9, 6, 0.95);
-  border: 1px solid rgba(201, 163, 106, 0.35);
+  color: #F5EFE6;
+  background: #262524;
+  border: 1px solid rgba(197, 171, 122, 0.35);
   border-radius: 6px;
   padding: 12px 14px;
   font-size: 14px;
@@ -491,25 +501,25 @@ textarea {
 .review-form input:focus,
 .review-form select:focus,
 .review-form textarea:focus {
-  border-color: #d4af37;
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+  border-color: #DEC89C;
+  box-shadow: 0 0 12px rgba(197, 171, 122, 0.35);
   outline: none;
-  background: #18110b;
+  background: #3B3A39;
 }
 
 .checkout-payment {
   display: grid;
   gap: 10px;
   margin: 0;
-  border: 1px solid rgba(201, 163, 106, 0.28);
+  border: 1px solid rgba(197, 171, 122, 0.28);
   border-radius: 10px;
   padding: 18px;
-  background: #18110b;
+  background: #3B3A39;
 }
 
 .checkout-payment legend {
   padding: 0 6px;
-  color: #d4af37;
+  color: #C5AB7A;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -520,7 +530,7 @@ textarea {
   align-items: center;
   gap: 10px;
   margin: 0;
-  color: #f7eedb;
+  color: #F5EFE6;
   cursor: pointer;
 }
 
@@ -528,12 +538,12 @@ textarea {
   width: auto;
   margin: 0;
   padding: 0;
-  accent-color: #d4af37;
+  accent-color: #C5AB7A;
 }
 
 .checkout-payment-note {
   margin-top: 12px;
-  color: #a89476;
+  color: #A18758;
   font-size: 13.5px;
   line-height: 1.5;
 }
@@ -7765,7 +7775,7 @@ html {
 
 /* ==========================================================================
    UNIFIED LUXURY PALETTE ACROSS ALL PAGES
-   Noir Obsidian (#0e0906) · Warm Champagne (#f7eedb) · Metallic Gold (#d4af37)
+   Matte Charcoal (#3B3A39 / #262524) · Brushed Champagne Gold (#C5AB7A / #DEC89C)
    ========================================================================== */
 
 /* Universal Background & Typography Overrides for All Pages */
@@ -7780,8 +7790,8 @@ main.inner,
 .story-intro,
 .client-experience,
 .client-voices {
-  background-color: #0e0906 !important;
-  color: #f3ead9 !important;
+  background-color: #262524 !important;
+  color: #F5EFE6 !important;
 }
 
 main.inner,
@@ -7796,8 +7806,8 @@ main.inner,
   }
   .top nav {
     top: 74px !important;
-    background: #140d08 !important;
-    border-bottom: 1px solid rgba(201, 163, 106, 0.25);
+    background: #262524 !important;
+    border-bottom: 1px solid rgba(197, 171, 122, 0.25);
   }
   main.inner,
   .page,
@@ -7813,7 +7823,7 @@ h1.ph {
   font-size: clamp(36px, 4.4vw, 56px);
   font-weight: 500;
   letter-spacing: -0.01em;
-  background: linear-gradient(135deg, #ffffff 0%, #f7eedb 45%, #d4af37 100%) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #DEC89C 50%, #C5AB7A 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   margin: 6px 0 16px 0;
@@ -7821,7 +7831,7 @@ h1.ph {
 
 .lead {
   font-size: clamp(17px, 1.4vw, 21px);
-  color: #d8c8b0 !important;
+  color: #DEC89C !important;
   line-height: 1.6;
   max-width: 720px;
   margin-bottom: 32px;
@@ -7829,7 +7839,7 @@ h1.ph {
 
 .cap.dk,
 .dk {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
   font-size: 12px;
   letter-spacing: 0.22em;
   font-weight: 600;
@@ -7854,9 +7864,9 @@ textarea,
 .f select,
 .f textarea,
 .cpn input {
-  background: rgba(18, 12, 7, 0.9) !important;
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #f7eedb !important;
+  background: #262524 !important;
+  border: 1px solid rgba(197, 171, 122, 0.35) !important;
+  color: #F5EFE6 !important;
   padding: 12px 14px !important;
   border-radius: 6px !important;
   font-size: 15px !important;
@@ -7874,14 +7884,15 @@ textarea:focus,
 .f select:focus,
 .f textarea:focus,
 .cpn input:focus {
-  border-color: #d4af37 !important;
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25) !important;
+  border-color: #DEC89C !important;
+  box-shadow: 0 0 14px rgba(197, 171, 122, 0.35) !important;
+  background: #3B3A39 !important;
   outline: none !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #8c7960 !important;
+  color: #A18758 !important;
   opacity: 1 !important;
 }
 
@@ -7895,9 +7906,9 @@ textarea::placeholder {
 }
 
 .chip {
-  background: rgba(24, 17, 11, 0.7) !important;
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #d8c8b0 !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.3) !important;
+  color: #DEC89C !important;
   padding: 8px 20px !important;
   border-radius: 24px !important;
   font-size: 13px !important;
@@ -7907,17 +7918,17 @@ textarea::placeholder {
 
 .chip:hover,
 .chip[aria-pressed="true"] {
-  background: linear-gradient(135deg, #d4af37, #aa8232) !important;
-  border-color: #d4af37 !important;
-  color: #120c07 !important;
+  background: linear-gradient(135deg, #DEC89C, #C5AB7A) !important;
+  border-color: #DEC89C !important;
+  color: #262524 !important;
   font-weight: 600 !important;
-  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(197, 171, 122, 0.35) !important;
 }
 
 .filters select {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #f7eedb !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.3) !important;
+  color: #F5EFE6 !important;
   padding: 9px 16px !important;
   border-radius: 6px !important;
   cursor: pointer;
@@ -7926,111 +7937,111 @@ textarea::placeholder {
 /* Cards & Product Grid Across Shop & Wishlist */
 .card,
 .card.luxury-card {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.22) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 10px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-  color: #f3ead9 !important;
+  box-shadow: 0 12px 32px rgba(20, 19, 18, 0.45) !important;
+  color: #F5EFE6 !important;
   overflow: hidden !important;
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
 }
 
 .card:hover {
   transform: translateY(-4px) !important;
-  border-color: rgba(201, 163, 106, 0.45) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(201, 163, 106, 0.15) !important;
+  border-color: #C5AB7A !important;
+  box-shadow: 0 18px 44px rgba(20, 19, 18, 0.6), 0 0 20px rgba(197, 171, 122, 0.2) !important;
 }
 
 .card .im,
 .luxury-card-media {
-  background: radial-gradient(circle at center, #241a12 0%, #18110b 80%) !important;
+  background: radial-gradient(circle at center, #4D4C4B 0%, #3B3A39 85%) !important;
 }
 
 .luxury-heart-btn {
-  background: rgba(18, 12, 7, 0.8) !important;
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #ebdcc4 !important;
+  background: rgba(38, 37, 36, 0.85) !important;
+  border: 1px solid rgba(197, 171, 122, 0.3) !important;
+  color: #DEC89C !important;
 }
 
 .luxury-heart-btn:hover,
 .luxury-heart-btn.is-active,
 .luxury-heart-btn[aria-pressed="true"] {
-  background: #d4af37 !important;
-  color: #120c07 !important;
-  border-color: #d4af37 !important;
+  background: #C5AB7A !important;
+  color: #262524 !important;
+  border-color: #C5AB7A !important;
 }
 
 /* Product Detail Page Elements */
 .pd img {
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  background: radial-gradient(circle at center, #241a12 0%, #160f0a 85%) !important;
+  border: 1px solid rgba(197, 171, 122, 0.3) !important;
+  background: radial-gradient(circle at center, #4D4C4B 0%, #3B3A39 85%) !important;
   border-radius: 10px;
 }
 
 .pd .price {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
   font-weight: 500;
 }
 
 .pd dl {
-  border-top: 1px solid rgba(201, 163, 106, 0.2);
-  border-bottom: 1px solid rgba(201, 163, 106, 0.2);
+  border-top: 1px solid rgba(197, 171, 122, 0.2);
+  border-bottom: 1px solid rgba(197, 171, 122, 0.2);
   padding: 16px 0;
 }
 
 .pd dt {
-  color: #c5a059 !important;
+  color: #C5AB7A !important;
 }
 
 .pd dd {
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
 }
 
 /* Stepper (Quantity buttons) */
 .stepper,
 .luxury-stepper {
-  border: 1px solid rgba(201, 163, 106, 0.35) !important;
-  background: #140d08 !important;
+  border: 1px solid rgba(197, 171, 122, 0.35) !important;
+  background: #262524 !important;
   border-radius: 6px !important;
   overflow: hidden;
 }
 
 .stepper button,
 .luxury-stepper button {
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
   background: transparent !important;
   transition: background 0.2s ease;
 }
 
 .stepper button:hover,
 .luxury-stepper button:hover {
-  background: rgba(201, 163, 106, 0.15) !important;
-  color: #d4af37 !important;
+  background: rgba(197, 171, 122, 0.18) !important;
+  color: #DEC89C !important;
 }
 
 .stepper span,
 .luxury-stepper span {
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
 }
 
 /* Cart & Checkout Summary Containers */
 .sum {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 12px !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
-  color: #f3ead9 !important;
+  box-shadow: 0 12px 36px rgba(20, 19, 18, 0.45) !important;
+  color: #F5EFE6 !important;
   padding: 28px !important;
 }
 
 .sum .r {
-  color: #d8c8b0 !important;
+  color: #DEC89C !important;
   padding: 8px 0 !important;
 }
 
 .sum .r.t {
-  border-top: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #d4af37 !important;
+  border-top: 1px solid rgba(197, 171, 122, 0.3) !important;
+  color: #C5AB7A !important;
   font-size: 24px !important;
   font-weight: 500 !important;
   padding-top: 16px !important;
@@ -8038,14 +8049,14 @@ textarea::placeholder {
 }
 
 .ci {
-  border-bottom: 1px solid rgba(201, 163, 106, 0.2) !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.2) !important;
   padding: 16px 0 !important;
 }
 
 .ci img {
   border-radius: 6px;
-  border: 1px solid rgba(201, 163, 106, 0.2);
-  background: #1e150e;
+  border: 1px solid rgba(197, 171, 122, 0.2);
+  background: #262524;
 }
 
 /* Checkout Steps & Payment Methods */
@@ -8224,56 +8235,56 @@ details p {
 
 /* Primary Action Buttons */
 .btn {
-  background: linear-gradient(135deg, #d4af37 0%, #aa8232 100%) !important;
-  color: #120c07 !important;
+  background: linear-gradient(135deg, #DEC89C 0%, #C5AB7A 50%, #A18758 100%) !important;
+  color: #262524 !important;
   font-weight: 600 !important;
   border: none !important;
   border-radius: 4px !important;
-  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.25) !important;
+  box-shadow: 0 4px 18px rgba(197, 171, 122, 0.28) !important;
   letter-spacing: 0.14em !important;
   transition: all 0.25s ease !important;
 }
 
 .btn:hover {
-  filter: brightness(1.12) !important;
+  filter: brightness(1.1) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.38) !important;
+  box-shadow: 0 8px 25px rgba(197, 171, 122, 0.4) !important;
 }
 
 .btn.line {
   background: transparent !important;
-  border: 1px solid #d4af37 !important;
-  color: #e4c791 !important;
+  border: 1px solid #C5AB7A !important;
+  color: #DEC89C !important;
 }
 
 .btn.line:hover {
-  background: rgba(212, 175, 55, 0.12) !important;
+  background: rgba(197, 171, 122, 0.14) !important;
   color: #ffffff !important;
 }
 
 .mini {
   background: transparent !important;
-  border: 1px solid rgba(201, 163, 106, 0.35) !important;
-  color: #d4af37 !important;
+  border: 1px solid rgba(197, 171, 122, 0.35) !important;
+  color: #DEC89C !important;
   border-radius: 4px !important;
 }
 
 .mini:hover {
-  background: #d4af37 !important;
-  color: #120c07 !important;
+  background: #C5AB7A !important;
+  color: #262524 !important;
 }
 
 /* Notices & Status Messages */
 .notice {
-  background: rgba(201, 163, 106, 0.12) !important;
-  border: 1px solid rgba(201, 163, 106, 0.3) !important;
-  color: #e4c791 !important;
+  background: rgba(197, 171, 122, 0.12) !important;
+  border: 1px solid rgba(197, 171, 122, 0.3) !important;
+  color: #DEC89C !important;
   border-radius: 6px !important;
   padding: 14px 18px !important;
 }
 
 .empty {
-  color: #a89476 !important;
+  color: #A18758 !important;
   font-style: italic;
 }
 
@@ -8289,7 +8300,7 @@ details p {
 }
 
 .stars {
-  color: #d4af37 !important;
+  color: #DEC89C !important;
 }
 
 /* Google Sign-In Button & Auth Divider */
@@ -8325,7 +8336,7 @@ details p {
   align-items: center !important;
   text-align: center !important;
   margin: 14px 0 18px !important;
-  color: #a89476 !important;
+  color: #A18758 !important;
   font-size: 12px !important;
   letter-spacing: 0.1em !important;
   text-transform: uppercase !important;
@@ -8335,7 +8346,7 @@ details p {
 .auth-divider::after {
   content: "" !important;
   flex: 1 !important;
-  border-bottom: 1px solid rgba(201, 163, 106, 0.25) !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.25) !important;
 }
 
 .auth-divider span {
@@ -8343,8 +8354,9 @@ details p {
 }
 
 /* ==========================================================================
-   EXCLUSIVE LUXURY OBSIDIAN & GOLD FORMS & CHECKOUT PALETTE
-   Completely replaces all white, beige, and gray legacy form backgrounds
+   EXCLUSIVE LUXURY MATTE CHARCOAL & BRUSHED CHAMPAGNE GOLD
+   Box Surface: #3B3A39 / #4D4C4B / #262524
+   Logo & Text: #C5AB7A / #DEC89C / #A18758
    ========================================================================== */
 
 /* Cart & Checkout Grid Layout */
@@ -8364,27 +8376,27 @@ details p {
 
 /* Checkout Form Sections */
 .checkout-section {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 12px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
-  color: #f7eedb !important;
+  box-shadow: 0 10px 30px rgba(20, 19, 18, 0.45) !important;
+  color: #F5EFE6 !important;
   padding: clamp(20px, 2.5vw, 32px) !important;
   margin-bottom: 24px !important;
 }
 
 .checkout-section-heading {
-  border-bottom: 1px solid rgba(201, 163, 106, 0.22) !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.22) !important;
   padding-bottom: 16px !important;
   margin-bottom: 22px !important;
 }
 
 .checkout-section-heading h2 {
-  color: #f7eedb !important;
+  color: #DEC89C !important;
 }
 
 .checkout-step {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
   font-weight: 600 !important;
   letter-spacing: 0.14em !important;
 }
@@ -8393,7 +8405,7 @@ details p {
 .checkout-form label,
 .account-forms label,
 .review-form label {
-  color: #e4c791 !important;
+  color: #DEC89C !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   letter-spacing: 0.02em !important;
@@ -8408,9 +8420,9 @@ details p {
 .review-form textarea,
 .track-search-input,
 .checkout-whatsapp-diff-input {
-  background: rgba(14, 9, 6, 0.95) !important;
-  border: 1px solid rgba(201, 163, 106, 0.35) !important;
-  color: #f7eedb !important;
+  background: #262524 !important;
+  border: 1px solid rgba(197, 171, 122, 0.35) !important;
+  color: #F5EFE6 !important;
   border-radius: 6px !important;
   padding: 12px 14px !important;
   font-size: 14px !important;
@@ -8425,10 +8437,10 @@ details p {
 .review-form textarea:focus,
 .track-search-input:focus,
 .checkout-whatsapp-diff-input:focus {
-  border-color: #d4af37 !important;
-  box-shadow: 0 0 14px rgba(212, 175, 55, 0.3) !important;
+  border-color: #DEC89C !important;
+  box-shadow: 0 0 14px rgba(197, 171, 122, 0.35) !important;
   outline: none !important;
-  background: #18110b !important;
+  background: #3B3A39 !important;
 }
 
 /* Autofill Dark Mode Correction for Chrome / Safari */
@@ -8437,50 +8449,50 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
-  -webkit-text-fill-color: #f7eedb !important;
-  -webkit-box-shadow: 0 0 0px 1000px #120c08 inset !important;
-  box-shadow: 0 0 0px 1000px #120c08 inset !important;
+  -webkit-text-fill-color: #F5EFE6 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #262524 inset !important;
+  box-shadow: 0 0 0px 1000px #262524 inset !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
 
 ::placeholder {
-  color: #8c7960 !important;
+  color: #A18758 !important;
   opacity: 1 !important;
 }
 
 /* Payment Methods Fieldset */
 .checkout-payment {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 10px !important;
   padding: 20px !important;
 }
 
 .checkout-payment legend {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
   font-size: 15px !important;
   font-weight: 600 !important;
   letter-spacing: 0.04em !important;
 }
 
 .checkout-payment label {
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
   cursor: pointer !important;
 }
 
 .checkout-payment input[type="radio"] {
-  accent-color: #d4af37 !important;
+  accent-color: #C5AB7A !important;
 }
 
 .checkout-payment-note {
-  color: #a89476 !important;
+  color: #A18758 !important;
   font-size: 13.5px !important;
 }
 
 /* WhatsApp Notification Card on Checkout */
 .checkout-whatsapp-card {
-  background: rgba(20, 35, 22, 0.6) !important;
-  border: 1px solid rgba(52, 168, 83, 0.35) !important;
+  background: rgba(38, 55, 42, 0.7) !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
   border-radius: 8px !important;
 }
 
@@ -8494,7 +8506,7 @@ select:-webkit-autofill {
 }
 
 .checkout-whatsapp-diff-wrap {
-  border-top: 1px dashed rgba(52, 168, 83, 0.3) !important;
+  border-top: 1px dashed rgba(74, 222, 128, 0.3) !important;
 }
 
 .checkout-whatsapp-diff-toggle {
@@ -8504,18 +8516,18 @@ select:-webkit-autofill {
 /* Checkout & Cart Order Summary Container */
 .checkout-summary,
 .sum {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 12px !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
-  color: #f7eedb !important;
+  box-shadow: 0 12px 36px rgba(20, 19, 18, 0.45) !important;
+  color: #F5EFE6 !important;
   padding: 24px !important;
 }
 
 .checkout-summary-title {
-  color: #f7eedb !important;
+  color: #DEC89C !important;
   font-family: var(--serif) !important;
-  border-bottom: 1px solid rgba(201, 163, 106, 0.22) !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.22) !important;
   padding-bottom: 14px !important;
   margin-bottom: 16px !important;
 }
@@ -8525,82 +8537,82 @@ select:-webkit-autofill {
   justify-content: space-between !important;
   align-items: center !important;
   padding: 10px 0 !important;
-  border-bottom: 1px solid rgba(201, 163, 106, 0.15) !important;
-  color: #d8c8b0 !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.18) !important;
+  color: #DEC89C !important;
   font-size: 15px !important;
 }
 
 .sum .rw.t {
-  border-top: 1px solid rgba(201, 163, 106, 0.35) !important;
+  border-top: 1px solid rgba(197, 171, 122, 0.35) !important;
   border-bottom: none !important;
   padding-top: 16px !important;
   margin-top: 12px !important;
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
   font-size: 18px !important;
 }
 
 .sum .rw.t b {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
   font-size: 24px !important;
 }
 
 /* Tracking Page Components */
 .track-search-card {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
   border-radius: 10px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(20, 19, 18, 0.4) !important;
 }
 
 .track-order-card-btn,
 .track-slim-card {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.28) !important;
-  color: #f7eedb !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.28) !important;
+  color: #F5EFE6 !important;
+  box-shadow: 0 8px 24px rgba(20, 19, 18, 0.4) !important;
 }
 
 .track-order-card-btn.is-selected {
-  border-color: #d4af37 !important;
-  background: #20160f !important;
-  box-shadow: 0 0 14px rgba(212, 175, 55, 0.25) !important;
+  border-color: #DEC89C !important;
+  background: #4D4C4B !important;
+  box-shadow: 0 0 14px rgba(197, 171, 122, 0.28) !important;
 }
 
 .track-card-id,
 .track-card-price,
 .track-slim-id-wrap h2 {
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
 }
 
 .track-card-item-name,
 .track-multi-header p {
-  color: #a89476 !important;
+  color: #A18758 !important;
 }
 
 .track-multi-header h3 {
-  color: #f7eedb !important;
+  color: #DEC89C !important;
 }
 
 .track-multi-badge {
-  background: #20160f !important;
-  border: 1px solid rgba(201, 163, 106, 0.25) !important;
-  color: #d4af37 !important;
+  background: #4D4C4B !important;
+  border: 1px solid rgba(197, 171, 122, 0.25) !important;
+  color: #DEC89C !important;
 }
 
 .track-slim-topbar {
-  border-bottom: 1px solid rgba(201, 163, 106, 0.2) !important;
+  border-bottom: 1px solid rgba(197, 171, 122, 0.2) !important;
 }
 
 /* Account Page Order Rows */
 .order-row {
-  background: #18110b !important;
-  border: 1px solid rgba(201, 163, 106, 0.25) !important;
+  background: #3B3A39 !important;
+  border: 1px solid rgba(197, 171, 122, 0.25) !important;
   border-radius: 8px !important;
   padding: 16px 20px !important;
   margin-bottom: 14px !important;
-  color: #f7eedb !important;
+  color: #F5EFE6 !important;
 }
 
 .order-row a {
-  color: #d4af37 !important;
+  color: #C5AB7A !important;
 }

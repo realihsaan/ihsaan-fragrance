@@ -878,13 +878,13 @@ function CheckoutPage() {
             </div>
             <div className="checkout-fields">
               {user ? (
-                <div className="checkout-account-details checkout-full" style={{ padding: "14px 18px", background: "#18110b", border: "1px solid rgba(201, 163, 106, 0.3)", borderRadius: "8px", marginBottom: "12px" }}>
-                  <div><span style={{ color: "#d4af37", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em" }}>Signed in as: </span><b style={{ color: "#f7eedb" }}>{user.user_metadata?.full_name || "Customer"} ({user.email})</b></div>
-                  <Link href="/account" style={{ fontSize: "13px", color: "#e4c791", textDecoration: "underline" }}>Manage account</Link>
+                <div className="checkout-account-details checkout-full" style={{ padding: "14px 18px", background: "#3B3A39", border: "1px solid rgba(197, 171, 122, 0.35)", borderRadius: "8px", marginBottom: "12px" }}>
+                  <div><span style={{ color: "#DEC89C", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em" }}>Signed in as: </span><b style={{ color: "#F5EFE6" }}>{user.user_metadata?.full_name || "Customer"} ({user.email})</b></div>
+                  <Link href="/account" style={{ fontSize: "13px", color: "#C5AB7A", textDecoration: "underline" }}>Manage account</Link>
                 </div>
               ) : (
-                <div className="checkout-full" style={{ fontSize: "14px", color: "#d8c8b0", marginBottom: "12px" }}>
-                  Already have an account? <Link className="ul" href="/account?next=%2Fcheckout" style={{ color: "#d4af37" }}><strong>Sign in</strong></Link> or continue as guest below.
+                <div className="checkout-full" style={{ fontSize: "14px", color: "#DEC89C", marginBottom: "12px" }}>
+                  Already have an account? <Link className="ul" href="/account?next=%2Fcheckout" style={{ color: "#DEC89C" }}><strong>Sign in</strong></Link> or continue as guest below.
                 </div>
               )}
 
@@ -1007,13 +1007,13 @@ function CheckoutPage() {
                 <span>Direct Bank Transfer (IBFT)</span>
               </label>
               {paymentMethod === "bank_transfer" && (
-                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#140d08", border: "1px solid rgba(201, 163, 106, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#f7eedb" }}>
-                  <p style={{ margin: "0 0 8px", fontWeight: "bold", color: "#d4af37", fontSize: "15px" }}>Our Bank Account Details:</p>
-                  <p style={{ margin: "0 0 5px", color: "#d8c8b0" }}><b style={{ color: "#f7eedb" }}>Bank:</b> {bankDetails?.bankName || "Meezan Bank Ltd"}</p>
-                  <p style={{ margin: "0 0 5px", color: "#d8c8b0" }}><b style={{ color: "#f7eedb" }}>Account Title:</b> {bankDetails?.accountTitle || "Maison Ihsaan Ali Pvt Ltd"}</p>
-                  <p style={{ margin: "0 0 5px", color: "#d8c8b0" }}><b style={{ color: "#f7eedb" }}>Account No:</b> {bankDetails?.accountNumber || "01020304050607"}</p>
-                  <p style={{ margin: "0 0 10px", color: "#d8c8b0" }}><b style={{ color: "#f7eedb" }}>IBAN:</b> {bankDetails?.iban || "PK65MEZN0001020304050607"}</p>
-                  <label style={{ display: "block", marginTop: "12px", color: "#e4c791" }}>
+                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#262524", border: "1px solid rgba(197, 171, 122, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#F5EFE6" }}>
+                  <p style={{ margin: "0 0 8px", fontWeight: "bold", color: "#DEC89C", fontSize: "15px" }}>Our Bank Account Details:</p>
+                  <p style={{ margin: "0 0 5px", color: "#C5AB7A" }}><b style={{ color: "#F5EFE6" }}>Bank:</b> {bankDetails?.bankName || "Meezan Bank Ltd"}</p>
+                  <p style={{ margin: "0 0 5px", color: "#C5AB7A" }}><b style={{ color: "#F5EFE6" }}>Account Title:</b> {bankDetails?.accountTitle || "Maison Ihsaan Ali Pvt Ltd"}</p>
+                  <p style={{ margin: "0 0 5px", color: "#C5AB7A" }}><b style={{ color: "#F5EFE6" }}>Account No:</b> {bankDetails?.accountNumber || "01020304050607"}</p>
+                  <p style={{ margin: "0 0 10px", color: "#C5AB7A" }}><b style={{ color: "#F5EFE6" }}>IBAN:</b> {bankDetails?.iban || "PK65MEZN0001020304050607"}</p>
+                  <label style={{ display: "block", marginTop: "12px", color: "#DEC89C" }}>
                     Transaction ID / Reference Number (optional)
                     <input
                       type="text"
@@ -1031,8 +1031,8 @@ function CheckoutPage() {
                 <span>JazzCash Mobile Account</span>
               </label>
               {paymentMethod === "jazzcash" && (
-                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#140d08", border: "1px solid rgba(201, 163, 106, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#f7eedb" }}>
-                  <label style={{ display: "block", marginBottom: "10px", color: "#e4c791" }}>
+                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#262524", border: "1px solid rgba(197, 171, 122, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#F5EFE6" }}>
+                  <label style={{ display: "block", marginBottom: "10px", color: "#DEC89C" }}>
                     JazzCash Registered Mobile Number
                     <input
                       type="tel"
@@ -1043,7 +1043,7 @@ function CheckoutPage() {
                       style={{ marginTop: "6px" }}
                     />
                   </label>
-                  <label style={{ display: "block", color: "#e4c791" }}>
+                  <label style={{ display: "block", color: "#DEC89C" }}>
                     Last 6 digits of CNIC (optional for Sandbox)
                     <input
                       type="text"
@@ -1062,8 +1062,8 @@ function CheckoutPage() {
                 <span>EasyPaisa Mobile Account</span>
               </label>
               {paymentMethod === "easypaisa" && (
-                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#140d08", border: "1px solid rgba(201, 163, 106, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#f7eedb" }}>
-                  <label style={{ display: "block", color: "#e4c791" }}>
+                <div style={{ margin: "10px 0 16px 26px", padding: "16px", background: "#262524", border: "1px solid rgba(197, 171, 122, 0.35)", borderRadius: "8px", fontSize: "14px", color: "#F5EFE6" }}>
+                  <label style={{ display: "block", color: "#DEC89C" }}>
                     EasyPaisa Registered Mobile Number
                     <input
                       type="tel"
