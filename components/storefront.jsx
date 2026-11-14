@@ -139,7 +139,6 @@ function LetterByLetter({ text, keyPrefix = "lbl", baseDelay = 0.04, step = 0.02
 function CollectionShowcase3D({ products, collectionCopy }) {
   const { add, wishlist, toggleWish } = useStore();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [animatingFromIndex, setAnimatingFromIndex] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState("next");
   const [isHovered, setIsHovered] = useState(false);
@@ -155,13 +154,11 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   const goTo = useCallback((nextIdx, dir = "next") => {
     if (isTransitioning || nextIdx === activeIndex) return;
     setDirection(dir);
-    setAnimatingFromIndex(activeIndex);
-    setActiveIndex(nextIdx);
     setIsTransitioning(true);
+    setActiveIndex(nextIdx);
     setTimeout(() => {
       setIsTransitioning(false);
-      setAnimatingFromIndex(null);
-    }, 500);
+    }, 450);
   }, [activeIndex, isTransitioning]);
 
   const handleNext = useCallback(() => {
@@ -374,86 +371,117 @@ function CollectionShowcase3D({ products, collectionCopy }) {
           <div className="showcase-3d-viewport">
             {products.map((prod, idx) => {
               const count = products.length;
-              const isCurrent = idx === activeIndex;
-              const isExiting = isTransitioning && idx === animatingFromIndex;
-              const isEntering = isTransitioning && idx === activeIndex;
+              let offset = idx - activeIndex;
+              if (offset < -1) offset += count;
+              if (offset > 1) offset -= count;
+
+              const isCurrent = offset === 0;
+              const isNext = offset === 1 || (activeIndex === count - 1 && idx === 0);
+              const isPrev = offset === -1 || (activeIndex === 0 && idx === count - 1);
 
               let cardClass = "showcase-3d-card";
               let transformStyle = {};
 
               if (isDragging) {
+                // Interactive real-time rotational drag around the 3D circle
                 if (isCurrent) {
                   cardClass += " is-center";
-                  const dragRotY = tilt.x + (dragX / 300) * 35;
+                  const dragRotY = tilt.x + (dragX / 240) * 26;
+                  const dragShiftX = dragX * 0.7;
+                  const dragShiftZ = 60 - Math.min(Math.abs(dragX) * 0.35, 60);
+                  const dragScale = 1 - Math.min(Math.abs(dragX) / 1200, 0.08);
                   transformStyle = {
-                    transform: `perspective(1200px) translateX(${dragX}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(1)`,
-                    opacity: Math.max(1 - Math.abs(dragX) / 500, 0.4),
+                    transform: `perspective(1200px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(${dragScale})`,
+                    opacity: 1,
                     zIndex: 10,
                     transition: "none",
                     cursor: "grabbing",
                   };
-                } else if (dragX < 0 && idx === (activeIndex + 1) % count) {
-                  const progress = Math.min(Math.abs(dragX) / 280, 1);
-                  const curX = 115 - progress * 115;
-                  const curRot = -35 + progress * 35;
-                  transformStyle = {
-                    transform: `perspective(1200px) translateX(${curX}%) rotateY(${curRot}deg) scale(1)`,
-                    opacity: progress,
-                    zIndex: 9,
-                    transition: "none",
-                    pointerEvents: "none",
-                  };
-                } else if (dragX > 0 && idx === (activeIndex - 1 + count) % count) {
-                  const progress = Math.min(dragX / 280, 1);
-                  const curX = -115 + progress * 115;
-                  const curRot = 35 - progress * 35;
-                  transformStyle = {
-                    transform: `perspective(1200px) translateX(${curX}%) rotateY(${curRot}deg) scale(1)`,
-                    opacity: progress,
-                    zIndex: 9,
-                    transition: "none",
-                    pointerEvents: "none",
-                  };
+                } else if (isNext) {
+                  cardClass += " is-next";
+                  if (dragX < 0) {
+                    const p = Math.min(Math.abs(dragX) / 240, 1);
+                    const curX = 46 - p * 46;
+                    const curZ = -90 + p * 150;
+                    const curRot = -20 + p * 20;
+                    const curScale = 0.86 + p * 0.14;
+                    transformStyle = {
+                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      opacity: 0.65 + p * 0.35,
+                      zIndex: p > 0.5 ? 9 : 5,
+                      transition: "none",
+                      cursor: "pointer",
+                    };
+                  } else {
+                    transformStyle = {
+                      transform: "perspective(1200px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
+                      opacity: 0.65,
+                      zIndex: 5,
+                      transition: "none",
+                      cursor: "pointer",
+                    };
+                  }
+                } else if (isPrev) {
+                  cardClass += " is-prev";
+                  if (dragX > 0) {
+                    const p = Math.min(dragX / 240, 1);
+                    const curX = -46 + p * 46;
+                    const curZ = -90 + p * 150;
+                    const curRot = 20 - p * 20;
+                    const curScale = 0.86 + p * 0.14;
+                    transformStyle = {
+                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      opacity: 0.55 + p * 0.45,
+                      zIndex: p > 0.5 ? 9 : 4,
+                      transition: "none",
+                      cursor: "pointer",
+                    };
+                  } else {
+                    transformStyle = {
+                      transform: "perspective(1200px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
+                      opacity: 0.55,
+                      zIndex: 4,
+                      transition: "none",
+                      cursor: "pointer",
+                    };
+                  }
                 } else {
                   transformStyle = {
-                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
-                    opacity: 0,
-                    zIndex: 1,
-                    pointerEvents: "none",
-                  };
-                }
-              } else if (isTransitioning) {
-                if (isEntering) {
-                  cardClass += direction === "next" ? " is-flipping-in-from-right" : " is-flipping-in-from-left";
-                  transformStyle = {
-                    zIndex: 10,
-                  };
-                } else if (isExiting) {
-                  cardClass += direction === "next" ? " is-flipping-out-to-left" : " is-flipping-out-to-right";
-                  transformStyle = {
-                    zIndex: 5,
-                    pointerEvents: "none",
-                  };
-                } else {
-                  transformStyle = {
-                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
+                    transform: "perspective(1200px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
                     opacity: 0,
                     zIndex: 1,
                     pointerEvents: "none",
                   };
                 }
               } else {
+                // 3D Circular Cylinder Carousel at rest or transitioning smoothly with CSS
                 if (isCurrent) {
                   cardClass += " is-center";
                   transformStyle = {
-                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) scale(1)`,
+                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(60px) scale(1)`,
                     opacity: 1,
                     zIndex: 10,
                     cursor: "grab",
                   };
+                } else if (isNext) {
+                  cardClass += " is-next";
+                  transformStyle = {
+                    transform: "perspective(1200px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
+                    opacity: 0.65,
+                    zIndex: 5,
+                    cursor: "pointer",
+                  };
+                } else if (isPrev) {
+                  cardClass += " is-prev";
+                  transformStyle = {
+                    transform: "perspective(1200px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
+                    opacity: 0.55,
+                    zIndex: 4,
+                    cursor: "pointer",
+                  };
                 } else {
                   transformStyle = {
-                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
+                    transform: "perspective(1200px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
                     opacity: 0,
                     zIndex: 1,
                     pointerEvents: "none",
@@ -474,7 +502,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                       e.preventDefault();
                       return;
                     }
-                    if (!isCurrent) goTo(idx, idx > activeIndex ? "next" : "prev");
+                    if (!isCurrent) goTo(idx, isNext ? "next" : "prev");
                   }}
                 >
                   {/* Subtle 3D Ambient Halo Glow */}
