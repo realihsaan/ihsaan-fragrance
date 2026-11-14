@@ -139,6 +139,7 @@ function LetterByLetter({ text, keyPrefix = "lbl", baseDelay = 0.04, step = 0.02
 function CollectionShowcase3D({ products, collectionCopy }) {
   const { add, wishlist, toggleWish } = useStore();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [animatingFromIndex, setAnimatingFromIndex] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState("next");
   const [isHovered, setIsHovered] = useState(false);
@@ -154,13 +155,13 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   const goTo = useCallback((nextIdx, dir = "next") => {
     if (isTransitioning || nextIdx === activeIndex) return;
     setDirection(dir);
+    setAnimatingFromIndex(activeIndex);
+    setActiveIndex(nextIdx);
     setIsTransitioning(true);
     setTimeout(() => {
-      setActiveIndex(nextIdx);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
-    }, 280);
+      setIsTransitioning(false);
+      setAnimatingFromIndex(null);
+    }, 500);
   }, [activeIndex, isTransitioning]);
 
   const handleNext = useCallback(() => {
@@ -373,92 +374,91 @@ function CollectionShowcase3D({ products, collectionCopy }) {
           <div className="showcase-3d-viewport">
             {products.map((prod, idx) => {
               const count = products.length;
-              let offset = idx - activeIndex;
-              if (offset < -1) offset += count;
-              if (offset > 1) offset -= count;
-
               const isCurrent = idx === activeIndex;
-              const isNext = offset === 1 || (activeIndex === count - 1 && idx === 0);
-              const isPrev = offset === -1 || (activeIndex === 0 && idx === count - 1);
+              const isExiting = isTransitioning && idx === animatingFromIndex;
+              const isEntering = isTransitioning && idx === activeIndex;
 
               let cardClass = "showcase-3d-card";
               let transformStyle = {};
 
-              if (isCurrent) {
-                cardClass += " is-center";
-                if (isTransitioning) {
-                  cardClass += direction === "next" ? " is-flipping-out-next" : " is-flipping-out-prev";
-                }
-                if (isDragging) {
-                  const dragRotY = tilt.x + (dragX / 240) * 45;
-                  const dragShiftX = dragX * 0.85;
-                  const dragShiftZ = 80 - Math.min(Math.abs(dragX) * 0.35, 60);
+              if (isDragging) {
+                if (isCurrent) {
+                  cardClass += " is-center";
+                  const dragRotY = tilt.x + (dragX / 300) * 35;
                   transformStyle = {
-                    transform: `perspective(1200px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(1)`,
-                    opacity: 1,
+                    transform: `perspective(1200px) translateX(${dragX}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(1)`,
+                    opacity: Math.max(1 - Math.abs(dragX) / 500, 0.4),
                     zIndex: 10,
                     transition: "none",
                     cursor: "grabbing",
                   };
+                } else if (dragX < 0 && idx === (activeIndex + 1) % count) {
+                  const progress = Math.min(Math.abs(dragX) / 280, 1);
+                  const curX = 115 - progress * 115;
+                  const curRot = -35 + progress * 35;
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${curX}%) rotateY(${curRot}deg) scale(1)`,
+                    opacity: progress,
+                    zIndex: 9,
+                    transition: "none",
+                    pointerEvents: "none",
+                  };
+                } else if (dragX > 0 && idx === (activeIndex - 1 + count) % count) {
+                  const progress = Math.min(dragX / 280, 1);
+                  const curX = -115 + progress * 115;
+                  const curRot = 35 - progress * 35;
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${curX}%) rotateY(${curRot}deg) scale(1)`,
+                    opacity: progress,
+                    zIndex: 9,
+                    transition: "none",
+                    pointerEvents: "none",
+                  };
                 } else {
                   transformStyle = {
-                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(80px) scale(1)`,
+                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
+                    opacity: 0,
+                    zIndex: 1,
+                    pointerEvents: "none",
+                  };
+                }
+              } else if (isTransitioning) {
+                if (isEntering) {
+                  cardClass += direction === "next" ? " is-flipping-in-from-right" : " is-flipping-in-from-left";
+                  transformStyle = {
+                    zIndex: 10,
+                  };
+                } else if (isExiting) {
+                  cardClass += direction === "next" ? " is-flipping-out-to-left" : " is-flipping-out-to-right";
+                  transformStyle = {
+                    zIndex: 5,
+                    pointerEvents: "none",
+                  };
+                } else {
+                  transformStyle = {
+                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
+                    opacity: 0,
+                    zIndex: 1,
+                    pointerEvents: "none",
+                  };
+                }
+              } else {
+                if (isCurrent) {
+                  cardClass += " is-center";
+                  transformStyle = {
+                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) scale(1)`,
                     opacity: 1,
                     zIndex: 10,
                     cursor: "grab",
                   };
-                }
-              } else if (isNext) {
-                cardClass += " is-next";
-                if (isDragging && dragX < 0) {
-                  const factor = Math.min(Math.abs(dragX) / 260, 1);
-                  const curX = 65 - factor * 45;
-                  const curZ = -140 + factor * 180;
-                  const curRot = -28 + factor * 25;
-                  const curScale = 0.82 + factor * 0.15;
-                  transformStyle = {
-                    transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
-                    opacity: 0.65 + factor * 0.3,
-                    zIndex: 6,
-                    transition: "none",
-                  };
                 } else {
                   transformStyle = {
-                    transform: "perspective(1200px) translateX(65%) translateZ(-140px) rotateY(-28deg) scale(0.82)",
-                    opacity: 0.65,
-                    zIndex: 5,
-                    cursor: "pointer",
+                    transform: `perspective(1200px) translateX(${idx > activeIndex ? "120%" : "-120%"}) scale(1)`,
+                    opacity: 0,
+                    zIndex: 1,
+                    pointerEvents: "none",
                   };
                 }
-              } else if (isPrev) {
-                cardClass += " is-prev";
-                if (isDragging && dragX > 0) {
-                  const factor = Math.min(dragX / 260, 1);
-                  const curX = -65 + factor * 45;
-                  const curZ = -140 + factor * 180;
-                  const curRot = 28 - factor * 25;
-                  const curScale = 0.82 + factor * 0.15;
-                  transformStyle = {
-                    transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
-                    opacity: 0.65 + factor * 0.3,
-                    zIndex: 6,
-                    transition: "none",
-                  };
-                } else {
-                  transformStyle = {
-                    transform: "perspective(1200px) translateX(-65%) translateZ(-140px) rotateY(28deg) scale(0.82)",
-                    opacity: 0.65,
-                    zIndex: 4,
-                    cursor: "pointer",
-                  };
-                }
-              } else {
-                transformStyle = {
-                  transform: "perspective(1200px) translateX(120%) translateZ(-250px) rotateY(-35deg) scale(0.6)",
-                  opacity: 0,
-                  zIndex: 1,
-                  pointerEvents: "none",
-                };
               }
 
               const prodSpec = FORMULATION_SPECS[prod.id] || FORMULATION_SPECS.ext;

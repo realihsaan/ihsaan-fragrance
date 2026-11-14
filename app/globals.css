@@ -8648,8 +8648,8 @@ select:-webkit-autofill {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
-  gap: clamp(36px, 4vw, 64px);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(48px, 6vw, 96px);
   align-items: center;
 }
 
@@ -8659,6 +8659,8 @@ select:-webkit-autofill {
 
 .showcase-text-stage {
   min-width: 0;
+  max-width: 530px;
+  justify-self: start;
   transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), filter 0.32s ease;
 }
 
@@ -8988,6 +8990,8 @@ select:-webkit-autofill {
   user-select: none;
   cursor: grab;
   touch-action: pan-y;
+  overflow: hidden;
+  width: 100%;
 }
 
 .showcase-3d-stage.is-user-dragging,
@@ -8998,7 +9002,8 @@ select:-webkit-autofill {
 .showcase-3d-viewport {
   position: relative;
   width: 100%;
-  height: 510px;
+  max-width: 420px;
+  height: 520px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9008,26 +9013,20 @@ select:-webkit-autofill {
 /* 3D Floating Product Cards */
 .showcase-3d-card {
   position: absolute;
-  width: min(380px, 86vw);
+  width: min(380px, 90vw);
   background: #3B3A39;
   border: 1px solid rgba(197, 171, 122, 0.32);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 25px 60px rgba(15, 14, 13, 0.7), 0 0 35px rgba(197, 171, 122, 0.16);
-  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.65s ease, filter 0.65s ease, border-color 0.3s ease;
-  will-change: transform, opacity;
   transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .showcase-3d-card.is-center {
   border-color: rgba(197, 171, 122, 0.55);
   box-shadow: 0 30px 70px rgba(15, 14, 13, 0.85), 0 0 45px rgba(197, 171, 122, 0.25);
-}
-
-.showcase-3d-card.is-next:hover,
-.showcase-3d-card.is-prev:hover {
-  opacity: 0.85 !important;
-  border-color: #DEC89C;
 }
 
 /* 3D Flip Sheen Light Reflection Sweep */
@@ -9042,8 +9041,10 @@ select:-webkit-autofill {
   border-radius: 14px;
 }
 
-.showcase-3d-card.is-center .showcase-card-flip-sheen {
-  animation: cardFlipSheenSweep 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.showcase-3d-card.is-center .showcase-card-flip-sheen,
+.showcase-3d-card.is-flipping-in-from-right .showcase-card-flip-sheen,
+.showcase-3d-card.is-flipping-in-from-left .showcase-card-flip-sheen {
+  animation: cardFlipSheenSweep 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 @keyframes cardFlipSheenSweep {
@@ -9060,17 +9061,76 @@ select:-webkit-autofill {
   }
 }
 
-/* 3D Card Flip-out transition states */
-.showcase-3d-card.is-flipping-out-next {
-  transform: perspective(1200px) translateX(-55%) translateZ(-160px) rotateY(-75deg) scale(0.72) !important;
-  opacity: 0 !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease !important;
+/* Card 3D Flip-in from right (No zoom-out: scale remains 1) */
+.showcase-3d-card.is-flipping-in-from-right {
+  animation: cardFlipInFromRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 10;
+  pointer-events: auto;
 }
 
-.showcase-3d-card.is-flipping-out-prev {
-  transform: perspective(1200px) translateX(55%) translateZ(-160px) rotateY(75deg) scale(0.72) !important;
-  opacity: 0 !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease !important;
+@keyframes cardFlipInFromRight {
+  0% {
+    transform: perspective(1200px) translateX(115%) rotateY(-35deg) scale(1);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Card 3D Flip-out to left (No zoom-out: scale remains 1) */
+.showcase-3d-card.is-flipping-out-to-left {
+  animation: cardFlipOutToLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 5;
+  pointer-events: none;
+}
+
+@keyframes cardFlipOutToLeft {
+  0% {
+    transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1200px) translateX(-115%) rotateY(35deg) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Card 3D Flip-in from left (Reverse direction) */
+.showcase-3d-card.is-flipping-in-from-left {
+  animation: cardFlipInFromLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+@keyframes cardFlipInFromLeft {
+  0% {
+    transform: perspective(1200px) translateX(-115%) rotateY(35deg) scale(1);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Card 3D Flip-out to right (Reverse direction) */
+.showcase-3d-card.is-flipping-out-to-right {
+  animation: cardFlipOutToRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 5;
+  pointer-events: none;
+}
+
+@keyframes cardFlipOutToRight {
+  0% {
+    transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1200px) translateX(115%) rotateY(-35deg) scale(1);
+    opacity: 0;
+  }
 }
 
 /* Card Media with Bottle */
