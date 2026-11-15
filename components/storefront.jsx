@@ -239,45 +239,82 @@ function CollectionShowcase3D({ products, collectionCopy }) {
     return () => clearInterval(timer);
   }, [handleNext, isHovered, isDragging, isTransitioning, products.length]);
 
-  // Pointer drag gestures (Mouse Grab & Touch Swipe)
+  // Pointer drag gestures (Fluid, non-blocking mobile touch & mouse grab)
+  const pointerStartPosRef = useRef({ x: 0, y: 0 });
+  const isPointerInteractingRef = useRef(false);
+  const isHorizontalDragRef = useRef(false);
+
   const handlePointerDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
-    setIsDragging(true);
+    pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
     dragStartXRef.current = e.clientX;
+    isPointerInteractingRef.current = true;
+    isHorizontalDragRef.current = false;
     hasMovedRef.current = false;
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch (err) {}
+    // Note: Do NOT setPointerCapture here so the browser can handle natural vertical scrolling
   };
 
   const handlePointerMove = (e) => {
-    if (isDragging) {
-      const diff = e.clientX - dragStartXRef.current;
-      if (Math.abs(diff) > 4) {
+    if (!isPointerInteractingRef.current) {
+      if (e.pointerType === "mouse") {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        setTilt({
+          x: (x / (rect.width / 2)) * 10,
+          y: -(y / (rect.height / 2)) * 10,
+        });
+      }
+      return;
+    }
+
+    const diffX = e.clientX - pointerStartPosRef.current.x;
+    const diffY = e.clientY - pointerStartPosRef.current.y;
+
+    if (!isHorizontalDragRef.current) {
+      // Determine user intent after small threshold
+      if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          // Horizontal intent confirmed: lock into 3D carousel swipe
+          isHorizontalDragRef.current = true;
+          setIsDragging(true);
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch (err) {}
+        } else {
+          // Vertical scroll intent: release immediately so page scrolls smoothly
+          isPointerInteractingRef.current = false;
+          setIsDragging(false);
+          setDragX(0);
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (isHorizontalDragRef.current) {
+      if (Math.abs(diffX) > 4) {
         hasMovedRef.current = true;
       }
-      setDragX(diff);
-    } else {
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      setTilt({
-        x: (x / (rect.width / 2)) * 10,
-        y: -(y / (rect.height / 2)) * 10,
-      });
+      setDragX(diffX);
     }
   };
 
   const handlePointerUp = (e) => {
-    if (!isDragging) return;
+    if (!isPointerInteractingRef.current && !isDragging) return;
+    const wasDragging = isHorizontalDragRef.current || isDragging;
+    isPointerInteractingRef.current = false;
+    isHorizontalDragRef.current = false;
     setIsDragging(false);
+
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch (err) {}
 
-    // Flip threshold: 40px drag
-    if (Math.abs(dragX) > 40) {
+    // Flip threshold: 35px drag
+    if (wasDragging && Math.abs(dragX) > 35) {
       if (dragX < 0) {
         handleNext();
       } else {
@@ -288,6 +325,8 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   };
 
   const handlePointerCancel = () => {
+    isPointerInteractingRef.current = false;
+    isHorizontalDragRef.current = false;
     setIsDragging(false);
     setDragX(0);
   };
@@ -331,7 +370,10 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                   onClick={() => goTo(idx, idx > activeIndex ? "next" : "prev")}
                 >
                   <span className="pill-index">0{idx + 1}</span>
-                  <span className="pill-name">{prod.short}</span>
+                  <span className="pill-name pill-name-desktop">{prod.short}</span>
+                  <span className="pill-name pill-name-mobile">
+                    {prod.id === "ext" ? "Extrait" : prod.id === "edp" ? "EDP" : "EDT"}
+                  </span>
                   {isPillActive && !isHovered && (
                     <span className="pill-progress-indicator" style={{ background: pTheme.highlight }} />
                   )}
@@ -491,11 +533,11 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                 if (isCurrent) {
                   cardClass += " is-center";
                   const dragRotY = tilt.x + (dragX / 160) * 75;
-                  const dragShiftX = dragX * 0.7;
-                  const dragShiftZ = 60 - Math.min(Math.abs(dragX) * 0.4, 60);
+                  const dragShiftX = dragX * 0.65;
+                  const dragShiftZ = 50 - Math.min(Math.abs(dragX) * 0.4, 50);
                   const dragScale = 1 - Math.min(Math.abs(dragX) / 1000, 0.08);
                   transformStyle = {
-                    transform: `perspective(1400px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(${dragScale})`,
+                    transform: `perspective(1200px) translateX(${dragShiftX}px) translateZ(${dragShiftZ}px) rotateY(${dragRotY}deg) rotateX(${tilt.y}deg) scale(${dragScale})`,
                     opacity: 1,
                     zIndex: 10,
                     transition: "none",
@@ -507,13 +549,13 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                   cardClass += " is-next";
                   if (dragX < 0) {
                     const p = Math.min(Math.abs(dragX) / 200, 1);
-                    const curX = 46 - p * 46;
-                    const curZ = -90 + p * 150;
+                    const curX = 35 - p * 35;
+                    const curZ = -90 + p * 140;
                     const curRot = -20 + p * 20;
-                    const curScale = 0.86 + p * 0.14;
+                    const curScale = 0.82 + p * 0.18;
                     transformStyle = {
-                      transform: `perspective(1400px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
-                      opacity: 0.65 + p * 0.35,
+                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      opacity: 0.6 + p * 0.4,
                       zIndex: p > 0.5 ? 9 : 5,
                       transition: "none",
                       cursor: "pointer",
@@ -521,9 +563,6 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     };
                   } else {
                     transformStyle = {
-                      transform: "perspective(1400px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
-                      opacity: 0.65,
-                      zIndex: 5,
                       transition: "none",
                       cursor: "pointer",
                       borderColor: cardTheme.borderSoft,
@@ -533,13 +572,13 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                   cardClass += " is-prev";
                   if (dragX > 0) {
                     const p = Math.min(dragX / 200, 1);
-                    const curX = -46 + p * 46;
-                    const curZ = -90 + p * 150;
+                    const curX = -35 + p * 35;
+                    const curZ = -90 + p * 140;
                     const curRot = 20 - p * 20;
-                    const curScale = 0.86 + p * 0.14;
+                    const curScale = 0.82 + p * 0.18;
                     transformStyle = {
-                      transform: `perspective(1400px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
-                      opacity: 0.55 + p * 0.45,
+                      transform: `perspective(1200px) translateX(${curX}%) translateZ(${curZ}px) rotateY(${curRot}deg) scale(${curScale})`,
+                      opacity: 0.6 + p * 0.4,
                       zIndex: p > 0.5 ? 9 : 4,
                       transition: "none",
                       cursor: "pointer",
@@ -547,19 +586,14 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     };
                   } else {
                     transformStyle = {
-                      transform: "perspective(1400px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
-                      opacity: 0.55,
-                      zIndex: 4,
                       transition: "none",
                       cursor: "pointer",
                       borderColor: cardTheme.borderSoft,
                     };
                   }
                 } else {
+                  cardClass += " is-hidden";
                   transformStyle = {
-                    transform: "perspective(1400px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
-                    opacity: 0,
-                    zIndex: 1,
                     pointerEvents: "none",
                   };
                 }
@@ -577,10 +611,8 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     borderColor: cardTheme.borderSoft,
                   };
                 } else {
+                  cardClass += offset > 0 ? " is-next" : " is-prev";
                   transformStyle = {
-                    transform: `perspective(1400px) translateX(${offset > 0 ? "46%" : "-46%"}) translateZ(-90px) rotateY(${offset > 0 ? "-20deg" : "20deg"}) scale(0.86)`,
-                    opacity: 0.6,
-                    zIndex: 4,
                     borderColor: cardTheme.borderSoft,
                   };
                 }
@@ -589,7 +621,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                 if (isCurrent) {
                   cardClass += " is-center";
                   transformStyle = {
-                    transform: `perspective(1400px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(60px) scale(1)`,
+                    transform: `perspective(1200px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateZ(50px) scale(1)`,
                     opacity: 1,
                     zIndex: 10,
                     cursor: "grab",
@@ -599,26 +631,18 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                 } else if (isNext) {
                   cardClass += " is-next";
                   transformStyle = {
-                    transform: "perspective(1400px) translateX(46%) translateZ(-90px) rotateY(-20deg) scale(0.86)",
-                    opacity: 0.65,
-                    zIndex: 5,
                     cursor: "pointer",
                     borderColor: cardTheme.borderSoft,
                   };
                 } else if (isPrev) {
                   cardClass += " is-prev";
                   transformStyle = {
-                    transform: "perspective(1400px) translateX(-46%) translateZ(-90px) rotateY(20deg) scale(0.86)",
-                    opacity: 0.55,
-                    zIndex: 4,
                     cursor: "pointer",
                     borderColor: cardTheme.borderSoft,
                   };
                 } else {
+                  cardClass += " is-hidden";
                   transformStyle = {
-                    transform: "perspective(1400px) translateX(120%) translateZ(-200px) rotateY(-30deg) scale(0.6)",
-                    opacity: 0,
-                    zIndex: 1,
                     pointerEvents: "none",
                   };
                 }
