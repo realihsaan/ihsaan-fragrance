@@ -12,7 +12,7 @@ body.inner{background:var(--cream);color:var(--dk)}body.inner main{padding-top:8
 .bar{display:flex;align-items:center;gap:30px;height:104px;padding:0 4%}
 .logo{display:flex;align-items:center;gap:14px;font-size:29px;letter-spacing:.12em;color:var(--gold2);font-weight:500}
 .logo img{display:block;flex:0 0 96px;width:96px;height:96px;object-fit:contain}
-.top nav{display:flex;gap:46px;margin:0 auto 0 6%}.top nav a{padding:6px 0;border-bottom:1px solid transparent}.top nav a:hover,.top nav a.on{border-color:var(--gold)}
+.top nav, .top-desktop-nav{display:flex;gap:46px;margin:0 auto 0 6%}.top nav a, .top-desktop-nav a{padding:6px 0;border-bottom:1px solid transparent}.top nav a:hover,.top nav a.on,.top-desktop-nav a:hover{border-color:var(--gold)}
 .tools{display:flex;align-items:center;gap:22px}
 .sbox{position:relative;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--gold2)}
 .sbox input{background:none;border:0;letter-spacing:.2em;font-size:13.5px;text-transform:uppercase;width:130px;padding:6px 0;color:#f3ead9}.sbox input::placeholder{color:#e6d7bb;opacity:1}.sbox input:focus{outline:none}
@@ -79,7 +79,7 @@ body.open #drawer{transform:none}body.open #veil{opacity:1;pointer-events:auto}.
 #items{flex:1;overflow:auto;padding:10px 0}.tot{display:flex;justify-content:space-between;font-size:26px;padding:16px 0}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);background:var(--gold);color:#1a130b;padding:12px 22px;opacity:0;transition:.3s;z-index:60;pointer-events:none}#toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:1100px){
- .top nav{display:none;position:absolute;top:92px;left:0;right:0;background:#1a130c;flex-direction:column;padding:20px 4%;gap:16px;margin:0}.top nav.on{display:flex}#menuBtn{display:block}.logo{margin-right:auto;font-size:26px}
+ .top nav, .top-desktop-nav{display:none !important}.logo{margin-right:auto;font-size:26px}
  .copy{max-width:none;padding:120px 6% 0}.heroimg{position:relative;right:auto;width:100%;margin-top:20px}.hero{min-height:0}.tag,.lv1,.lv2{display:none}
  .notes{grid-template-columns:1fr 1fr;padding:20px 4%}.disc,.coll,.cards,.cards.two,.pd,.cartgrid,.story{grid-template-columns:1fr}.disc .t{padding:20px 6%}.q{border:0}.join{border:0;padding:0}}
 @media(max-width:560px){.sbox input{width:70px}.notes{grid-template-columns:1fr}.notes .it{border:0;padding:0}.bar{gap:12px}.cartbtn{padding-left:12px}.news input{width:170px}}

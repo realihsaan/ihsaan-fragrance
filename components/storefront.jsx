@@ -255,14 +255,67 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   const isPointerInteractingRef = useRef(false);
   const isHorizontalDragRef = useRef(false);
 
+  // Dedicated touch gesture handling for mobile screens
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const isTouchSwipingRef = useRef(false);
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    isTouchSwipingRef.current = false;
+    hasMovedRef.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const diffX = t.clientX - touchStartRef.current.x;
+    const diffY = t.clientY - touchStartRef.current.y;
+
+    if (!isTouchSwipingRef.current) {
+      if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          isTouchSwipingRef.current = true;
+          hasMovedRef.current = true;
+          setIsDragging(true);
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (isTouchSwipingRef.current) {
+      setDragX(diffX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isTouchSwipingRef.current) {
+      const movedX = dragX;
+      setIsDragging(false);
+      isTouchSwipingRef.current = false;
+      if (Math.abs(movedX) > 25) {
+        if (movedX < 0) {
+          handleNext();
+        } else {
+          handlePrev();
+        }
+      }
+      setDragX(0);
+    }
+  };
+
   const handlePointerDown = (e) => {
+    if (e.pointerType === "touch") return; // Touch handled by touch events
     if (e.button !== undefined && e.button !== 0) return;
     pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
     dragStartXRef.current = e.clientX;
     isPointerInteractingRef.current = true;
     isHorizontalDragRef.current = false;
     hasMovedRef.current = false;
-    // Note: Do NOT setPointerCapture here so the browser can handle natural vertical scrolling
   };
 
   const handlePointerMove = (e) => {
@@ -284,17 +337,14 @@ function CollectionShowcase3D({ products, collectionCopy }) {
     const diffY = e.clientY - pointerStartPosRef.current.y;
 
     if (!isHorizontalDragRef.current) {
-      // Determine user intent after small threshold
       if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
         if (Math.abs(diffX) > Math.abs(diffY)) {
-          // Horizontal intent confirmed: lock into 3D carousel swipe
           isHorizontalDragRef.current = true;
           setIsDragging(true);
           try {
             e.currentTarget.setPointerCapture(e.pointerId);
           } catch (err) {}
         } else {
-          // Vertical scroll intent: release immediately so page scrolls smoothly
           isPointerInteractingRef.current = false;
           setIsDragging(false);
           setDragX(0);
@@ -306,7 +356,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
     }
 
     if (isHorizontalDragRef.current) {
-      if (Math.abs(diffX) > 4) {
+      if (Math.abs(diffX) > 10) {
         hasMovedRef.current = true;
       }
       setDragX(diffX);
@@ -324,8 +374,8 @@ function CollectionShowcase3D({ products, collectionCopy }) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch (err) {}
 
-    // Flip threshold: 35px drag
-    if (wasDragging && Math.abs(dragX) > 35) {
+    // Flip threshold: 28px drag
+    if (wasDragging && Math.abs(dragX) > 28) {
       if (dragX < 0) {
         handleNext();
       } else {
@@ -528,6 +578,10 @@ function CollectionShowcase3D({ products, collectionCopy }) {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerCancel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           <div className="showcase-3d-viewport">
             {products.map((prod, idx) => {
@@ -801,6 +855,35 @@ function CollectionShowcase3D({ products, collectionCopy }) {
             <span className="drag-hint-icon">‹‹</span>
             <span className="drag-hint-text">Drag with mouse to flip expressions</span>
             <span className="drag-hint-icon">››</span>
+          </div>
+
+          {/* Mobile Direct Tap Flip Arrows */}
+          <div className="showcase-mobile-nav-arrows" aria-label="Fragrance carousel navigation">
+            <button
+              type="button"
+              className="showcase-mobile-arrow showcase-arrow-prev"
+              aria-label="Previous fragrance"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrev();
+              }}
+            >
+              ‹
+            </button>
+            <span className="showcase-mobile-counter">
+              0{activeIndex + 1} / 0{products.length}
+            </span>
+            <button
+              type="button"
+              className="showcase-mobile-arrow showcase-arrow-next"
+              aria-label="Next fragrance"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNext();
+              }}
+            >
+              ›
+            </button>
           </div>
         </div>
 

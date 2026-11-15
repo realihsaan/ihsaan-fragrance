@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { money } from "./catalog";
 import { useStore } from "./store-context";
 
@@ -29,6 +29,19 @@ export function SiteChrome({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
+
+  // Prevent background scroll when mobile sidebar drawer or cart drawer is open
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (menuOpen || drawerOpen) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [menuOpen, drawerOpen]);
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
     return term
@@ -66,11 +79,11 @@ export function SiteChrome({ children }) {
       <header className="top solid" id="hd">
         <div className="bar">
           <Logo />
-          <nav id="nav" className={`cap ${menuOpen ? "on" : ""}`}>
-            <Link href="/shop" onClick={() => setMenuOpen(false)}>The Collection</Link>
-            <Link href="/story" onClick={() => setMenuOpen(false)}>Our Story</Link>
-            <Link href="/track" onClick={() => setMenuOpen(false)}>Live Tracking</Link>
-            <Link href="/contact" onClick={() => setMenuOpen(false)}>Concierge</Link>
+          <nav id="desktopNav" className="top-desktop-nav cap" aria-label="Desktop Navigation">
+            <Link href="/shop">The Collection</Link>
+            <Link href="/story">Our Story</Link>
+            <Link href="/track">Live Tracking</Link>
+            <Link href="/contact">Concierge</Link>
           </nav>
           <div className="tools">
             <div className="sbox">
@@ -118,8 +131,10 @@ export function SiteChrome({ children }) {
             <button
               id="menuBtn"
               type="button"
-              aria-label="Toggle menu"
+              className={`luxury-menu-btn ${menuOpen ? "is-open" : ""}`}
+              aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={menuOpen}
+              aria-controls="mobileNavDrawer"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -271,6 +286,137 @@ export function SiteChrome({ children }) {
             </div>
           </div>
         )}
+      </aside>
+
+      {/* Mobile Navigation Sidebar Drawer & Veil */}
+      <div
+        id="mobileNavVeil"
+        className={`mobile-nav-veil ${menuOpen ? "active" : ""}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+      <aside
+        id="mobileNavDrawer"
+        className={`mobile-nav-drawer ${menuOpen ? "active" : ""}`}
+        aria-label="Navigation Menu"
+        aria-hidden={!menuOpen}
+      >
+        {/* Mobile Sidebar Top Brand Bar with Close Button */}
+        <div className="mobile-nav-top">
+          <div className="mobile-nav-brand">
+            <Image
+              src="/assets/images/logo-ring.png"
+              alt="Maison Ihsaan Ali"
+              width={46}
+              height={46}
+              unoptimized
+            />
+            <div className="mobile-nav-brand-text">
+              <span className="mobile-nav-brand-name">MAISON IHSAAN ALI</span>
+              <span className="mobile-nav-brand-tag">HAUTE PARFUMERIE · GRASSE</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="mobile-nav-close-btn"
+            aria-label="Close navigation sidebar"
+            onClick={() => setMenuOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Scrollable Navigation Body */}
+        <div className="mobile-nav-body">
+          <div className="mobile-nav-eyebrow">PARFUM ATELIER</div>
+          <nav className="mobile-nav-list cap">
+            <Link href="/shop" onClick={() => setMenuOpen(false)} className="mobile-nav-item">
+              <span className="mobile-nav-item-icon">⚜️</span>
+              <div className="mobile-nav-item-texts">
+                <span className="mobile-nav-item-label">The Collection</span>
+                <span className="mobile-nav-item-sub">All 3 Expressions</span>
+              </div>
+              <span className="mobile-nav-item-arrow">→</span>
+            </Link>
+            <Link href="/story" onClick={() => setMenuOpen(false)} className="mobile-nav-item">
+              <span className="mobile-nav-item-icon">📜</span>
+              <div className="mobile-nav-item-texts">
+                <span className="mobile-nav-item-label">Our Story</span>
+                <span className="mobile-nav-item-sub">Artisan Heritage</span>
+              </div>
+              <span className="mobile-nav-item-arrow">→</span>
+            </Link>
+            <Link href="/track" onClick={() => setMenuOpen(false)} className="mobile-nav-item">
+              <span className="mobile-nav-item-icon">🚚</span>
+              <div className="mobile-nav-item-texts">
+                <span className="mobile-nav-item-label">Live Order Tracking</span>
+                <span className="mobile-nav-item-sub">Nationwide Courier</span>
+              </div>
+              <span className="mobile-nav-item-arrow">→</span>
+            </Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="mobile-nav-item">
+              <span className="mobile-nav-item-icon">🏛️</span>
+              <div className="mobile-nav-item-texts">
+                <span className="mobile-nav-item-label">Client Concierge</span>
+                <span className="mobile-nav-item-sub">Atelier Advisory</span>
+              </div>
+              <span className="mobile-nav-item-arrow">→</span>
+            </Link>
+          </nav>
+
+          <div className="mobile-nav-separator" />
+
+          <div className="mobile-nav-eyebrow">CLIENT SERVICES</div>
+          <div className="mobile-nav-action-cards">
+            <Link href="/account" onClick={() => setMenuOpen(false)} className="mobile-nav-card">
+              <span className="card-symbol">♙</span>
+              <span className="card-label">Account</span>
+              <small className="card-badge">{user ? "Active" : "Sign In"}</small>
+            </Link>
+            <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="mobile-nav-card">
+              <span className="card-symbol">♡</span>
+              <span className="card-label">Wishlist</span>
+              <small className="card-badge">{wishlist.length} {wishlist.length === 1 ? "bottle" : "bottles"}</small>
+            </Link>
+            <button
+              type="button"
+              className="mobile-nav-card"
+              onClick={() => {
+                setMenuOpen(false);
+                setDrawerOpen(true);
+              }}
+            >
+              <span className="card-symbol">🛍️</span>
+              <span className="card-label">Scent Bag</span>
+              <small className="card-badge">{itemCount} {itemCount === 1 ? "bottle" : "bottles"}</small>
+            </button>
+          </div>
+
+          <div className="mobile-nav-perks-card">
+            <div className="mobile-perk-line">
+              <span className="perk-bullet">✓</span>
+              <span>100% Pure Extrait Concentrates</span>
+            </div>
+            <div className="mobile-perk-line">
+              <span className="perk-bullet">✓</span>
+              <span>Complimentary Nationwide Express</span>
+            </div>
+            <div className="mobile-perk-line">
+              <span className="perk-bullet">✓</span>
+              <span>Cash on Delivery · Card · JazzCash</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="mobile-nav-footer">
+          <Link href="/contact" onClick={() => setMenuOpen(false)} className="mobile-nav-concierge-btn">
+            <span>💬 Speak with Fragrance Concierge</span>
+          </Link>
+          <div className="mobile-nav-copyright">
+            © {new Date().getFullYear()} Maison Ihsaan Ali Haute Parfumerie
+          </div>
+        </div>
       </aside>
       <div id="toast" className={toast ? "on" : ""} role="status" aria-live="polite">{toast}</div>
     </>
