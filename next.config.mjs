@@ -2,6 +2,15 @@
 const nextConfig = {
   poweredByHeader: false,
   outputFileTracingRoot: process.cwd(),
+  allowedDevOrigins: [
+    "localhost",
+    "localhost:3001",
+    "127.0.0.1",
+    "127.0.0.1:3001",
+    "192.168.0.109",
+    "192.168.0.109:3001",
+    "192.168.*",
+  ],
   async redirects() {
     return [
       { source: "/index.html", destination: "/", permanent: true },

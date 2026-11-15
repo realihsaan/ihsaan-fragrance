@@ -30,17 +30,25 @@ export function SiteChrome({ children }) {
   const [query, setQuery] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
 
-  // Prevent background scroll when mobile sidebar drawer or cart drawer is open
+  // Sync mobile sidebar drawer DOM with React state
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (menuOpen || drawerOpen) {
+    const drawer = document.getElementById("mobileNavDrawer");
+    const veil = document.getElementById("mobileNavVeil");
+    const btn = document.getElementById("menuBtn");
+    if (menuOpen) {
+      drawer?.classList.add("active");
+      veil?.classList.add("active");
+      btn?.classList.add("is-open");
       document.body.classList.add("modal-open");
     } else {
-      document.body.classList.remove("modal-open");
+      drawer?.classList.remove("active");
+      veil?.classList.remove("active");
+      btn?.classList.remove("is-open");
+      if (!drawerOpen) {
+        document.body.classList.remove("modal-open");
+      }
     }
-    return () => {
-      document.body.classList.remove("modal-open");
-    };
   }, [menuOpen, drawerOpen]);
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -140,8 +148,13 @@ export function SiteChrome({ children }) {
                 e.stopPropagation();
                 setMenuOpen((open) => !open);
               }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpen((open) => !open);
+              }}
             >
-              <span aria-hidden="true" style={{ fontSize: menuOpen ? "22px" : "20px", display: "inline-block", lineHeight: 1 }}>
+              <span aria-hidden="true" style={{ fontSize: menuOpen ? "22px" : "20px", display: "inline-block", lineHeight: 1, pointerEvents: "none" }}>
                 {menuOpen ? "✕" : "☰"}
               </span>
             </button>
@@ -418,6 +431,94 @@ export function SiteChrome({ children }) {
           </div>
         </div>
       </aside>
+
+      {/* Instant Native Mobile Drawer Controller (Zero-hydration dependency) */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              function bindDrawer() {
+                var btn = document.getElementById('menuBtn');
+                var drawer = document.getElementById('mobileNavDrawer');
+                var veil = document.getElementById('mobileNavVeil');
+                if (!btn || !drawer || !veil || btn.__instantBound) return;
+                btn.__instantBound = true;
+
+                function toggle(e) {
+                  if (e) {
+                    if (e.cancelable) e.preventDefault();
+                    e.stopPropagation();
+                  }
+                  var open = drawer.classList.contains('active');
+                  if (open) {
+                    drawer.classList.remove('active');
+                    veil.classList.remove('active');
+                    btn.classList.remove('is-open');
+                    document.body.classList.remove('modal-open');
+                  } else {
+                    drawer.classList.add('active');
+                    veil.classList.add('active');
+                    btn.classList.add('is-open');
+                    document.body.classList.add('modal-open');
+                  }
+                }
+
+                btn.addEventListener('click', toggle);
+                btn.addEventListener('touchend', function(e) { toggle(e); }, { passive: false });
+
+                veil.addEventListener('click', function() {
+                  drawer.classList.remove('active');
+                  veil.classList.remove('active');
+                  btn.classList.remove('is-open');
+                  document.body.classList.remove('modal-open');
+                });
+                veil.addEventListener('touchend', function(e) {
+                  if (e.cancelable) e.preventDefault();
+                  drawer.classList.remove('active');
+                  veil.classList.remove('active');
+                  btn.classList.remove('is-open');
+                  document.body.classList.remove('modal-open');
+                }, { passive: false });
+
+                var closeBtn = drawer.querySelector('.mobile-nav-close-btn');
+                if (closeBtn) {
+                  closeBtn.addEventListener('click', function() {
+                    drawer.classList.remove('active');
+                    veil.classList.remove('active');
+                    btn.classList.remove('is-open');
+                    document.body.classList.remove('modal-open');
+                  });
+                  closeBtn.addEventListener('touchend', function(e) {
+                    if (e.cancelable) e.preventDefault();
+                    drawer.classList.remove('active');
+                    veil.classList.remove('active');
+                    btn.classList.remove('is-open');
+                    document.body.classList.remove('modal-open');
+                  }, { passive: false });
+                }
+
+                var links = drawer.querySelectorAll('a, button:not(.mobile-nav-close-btn)');
+                for (var i = 0; i < links.length; i++) {
+                  links[i].addEventListener('click', function() {
+                    drawer.classList.remove('active');
+                    veil.classList.remove('active');
+                    btn.classList.remove('is-open');
+                    document.body.classList.remove('modal-open');
+                  });
+                }
+              }
+
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bindDrawer);
+              } else {
+                bindDrawer();
+              }
+              setTimeout(bindDrawer, 50);
+              setTimeout(bindDrawer, 300);
+            })();
+          `,
+        }}
+      />
       <div id="toast" className={toast ? "on" : ""} role="status" aria-live="polite">{toast}</div>
     </>
   );
