@@ -115,7 +115,21 @@ export function SiteChrome({ children }) {
               <span className="cart-label">Cart</span>
               <span className="cart-gold-badge">{itemCount}</span>
             </button>
-            <button id="menuBtn" type="button" aria-label="Toggle menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>☰</button>
+            <button
+              id="menuBtn"
+              type="button"
+              aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpen((open) => !open);
+              }}
+            >
+              <span aria-hidden="true" style={{ fontSize: menuOpen ? "22px" : "20px", display: "inline-block", lineHeight: 1 }}>
+                {menuOpen ? "✕" : "☰"}
+              </span>
+            </button>
           </div>
         </div>
       </header>

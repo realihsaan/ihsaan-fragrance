@@ -210,17 +210,28 @@ function CollectionShowcase3D({ products, collectionCopy }) {
   const activeSpec = FORMULATION_SPECS[activeProduct?.id] || FORMULATION_SPECS.ext;
   const activeTheme = PRODUCT_THEMES[activeProduct?.id] || PRODUCT_THEMES.ext;
 
+  const transitionTimerRef = useRef(null);
+
   const goTo = useCallback((nextIdx, dir = "next") => {
-    if (isTransitioning || nextIdx === activeIndex) return;
+    if (nextIdx === activeIndex) return;
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+    }
     setDirection(dir);
     setAnimatingFromIndex(activeIndex);
     setActiveIndex(nextIdx);
     setIsTransitioning(true);
-    setTimeout(() => {
+    transitionTimerRef.current = setTimeout(() => {
       setIsTransitioning(false);
       setAnimatingFromIndex(null);
     }, 650);
-  }, [activeIndex, isTransitioning]);
+  }, [activeIndex]);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
 
   const handleNext = useCallback(() => {
     goTo((activeIndex + 1) % products.length, "next");
@@ -331,6 +342,12 @@ function CollectionShowcase3D({ products, collectionCopy }) {
     setDragX(0);
   };
 
+  const handleMouseEnter = () => {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
+      setIsHovered(true);
+    }
+  };
+
   const handleMouseLeave = () => {
     if (!isDragging) {
       setTilt({ x: 0, y: 0 });
@@ -347,8 +364,8 @@ function CollectionShowcase3D({ products, collectionCopy }) {
         {/* Left Column: Dynamically Animated Perfume Story & Formulation Specs */}
         <div 
           className={`showcase-text-stage ${isTransitioning ? "is-transitioning" : "is-active"}`}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Quick Expression Switcher Tabs */}
           <div className="showcase-expression-nav" role="tablist" aria-label="Fragrance Expressions">
@@ -367,14 +384,18 @@ function CollectionShowcase3D({ products, collectionCopy }) {
                     color: pTheme.highlight,
                     boxShadow: `0 4px 16px ${pTheme.glowSoft}`,
                   } : undefined}
-                  onClick={() => goTo(idx, idx > activeIndex ? "next" : "prev")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    goTo(idx, idx > activeIndex ? "next" : "prev");
+                  }}
                 >
                   <span className="pill-index">0{idx + 1}</span>
                   <span className="pill-name pill-name-desktop">{prod.short}</span>
                   <span className="pill-name pill-name-mobile">
                     {prod.id === "ext" ? "Extrait" : prod.id === "edp" ? "EDP" : "EDT"}
                   </span>
-                  {isPillActive && !isHovered && (
+                  {isPillActive && (
                     <span className="pill-progress-indicator" style={{ background: pTheme.highlight }} />
                   )}
                 </button>
@@ -501,7 +522,7 @@ function CollectionShowcase3D({ products, collectionCopy }) {
         {/* Right Column: 3D Perspective Floating Card Stage with Mouse Grab & 3D Flip */}
         <div 
           className={`showcase-3d-stage ${isDragging ? "is-user-dragging" : ""}`}
-          onMouseEnter={() => setIsHovered(true)}
+          onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
